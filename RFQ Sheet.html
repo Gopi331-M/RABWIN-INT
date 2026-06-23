@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RFQ Tracking System</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --hbg:#1e1b4b;--htxt:#fff;--acc:#6366f1;--acctxt:#fff;
+  --bg:#f8f9fa;--card:#fff;--border:#e5e7eb;
+  --txt:#111827;--sec:#6b7280;--alt:#f9fafb;
+  --thbg:#f3f4f6;--thtxt:#6b7280;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;font-size:14px}
+input,select,textarea{background:#fff;border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;width:100%;outline:none;color:var(--txt);transition:border 0.15s,box-shadow 0.15s;font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+button{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:6px 13px;font-size:13px;cursor:pointer;color:var(--txt);transition:all 0.15s;font-family:inherit;white-space:nowrap}
+button:hover{background:var(--alt)}
+.btn-primary{background:var(--acc);color:var(--acctxt);border-color:var(--acc);font-weight:600}
+.btn-primary:hover{opacity:.9;background:var(--acc)}
+.btn-danger{color:#dc2626;border-color:#fca5a5}
+.btn-danger:hover{background:#fee2e2}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--sec)}
+.btn-ghost:hover{background:var(--alt);color:var(--txt)}
+table{border-collapse:collapse;width:100%}
+th,td{border-bottom:1px solid var(--border);text-align:left;vertical-align:middle}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.52);display:flex;align-items:flex-start;justify-content:center;z-index:400;overflow-y:auto;padding:2rem 1rem}
+.modal{background:#fff;border-radius:14px;padding:1.75rem;width:100%;border:1px solid var(--border);margin-top:24px;box-shadow:0 12px 48px rgba(0,0,0,.16);max-width:720px}
+.modal-sm{max-width:400px}
+.modal-md{max-width:520px}
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;gap:4px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem}
+.igrp{display:flex;flex-direction:column;gap:4px}
+.igrp label{font-size:11px;font-weight:700;color:var(--sec);text-transform:uppercase;letter-spacing:.05em}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.pwr{position:relative}
+.pwr input{padding-right:36px}
+.pwr .eb{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:2px;color:var(--sec)}
+.toast{position:fixed;bottom:24px;right:24px;background:#111;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;z-index:999;display:flex;align-items:center;gap:8px;box-shadow:0 4px 24px rgba(0,0,0,.22);animation:toastin .22s ease;pointer-events:none}
+@keyframes toastin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.nav-btn{border:1px solid transparent;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:6px;transition:all .15s;background:transparent;font-family:inherit}
+.drag-handle{cursor:grab;color:var(--sec);padding:0 4px;opacity:.5}
+.drag-handle:hover{opacity:1}
+.col-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:13px;margin-bottom:6px;transition:background .1s}
+.col-item.dragging{opacity:.4}
+.col-item.drag-over{border-color:var(--acc);background:#f5f3ff}
+.section-hd{font-size:18px;font-weight:700;color:var(--acc);margin:0 0 1.25rem}
+.view-only-bar{background:#fef3c7;border:1px solid #fcd34d;border-radius:9px;padding:9px 14px;font-size:13px;color:#92400e;display:flex;align-items:center;gap:7px;margin-bottom:1rem}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem}
+.crow{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6}
+.cust-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;transition:box-shadow .15s}
+.cust-card:hover{box-shadow:0 4px 18px rgba(0,0,0,.08)}
+.th-drag{cursor:grab}
+.th-drag:active{cursor:grabbing}
+.empty{padding:2.5rem;text-align:center;color:var(--sec)}
+input[type=color]{width:30px;height:26px;border:1px solid var(--border);border-radius:5px;padding:2px;cursor:pointer;background:none}
+.tab{padding:6px 14px;border-radius:7px;border:1px solid transparent;cursor:pointer;font-size:13px;background:transparent;font-weight:500;color:var(--sec)}
+.tab.active{background:var(--acc);color:#fff;border-color:var(--acc)}
+.dropdown-wrap{position:relative;display:inline-block}
+.dropdown-menu{position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.14);z-index:200;min-width:180px;padding:6px;display:flex;flex-direction:column;gap:2px}
+.dropdown-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--txt);border:none;background:transparent;width:100%;text-align:left;font-family:inherit}
+.dropdown-item:hover{background:var(--alt)}
+.dropdown-item i{font-size:16px;width:18px;flex-shrink:0}
+@media print{
+  body{background:#fff!important}
+  header,nav,.no-print{display:none!important}
+  .print-area{display:block!important}
+  .print-header{display:flex!important}
+  main{padding:0!important;max-width:100%!important}
+  .card,.stat-card{break-inside:avoid}
+  table{font-size:11px}
+  th,td{padding:5px 7px!important}
+  .badge{font-size:10px!important;padding:1px 6px!important}
+  button{display:none!important}
+  .view-only-bar{display:none!important}
+  input,select{display:none!important}
+  h2{font-size:15px!important}
+  .print-show{display:block!important}
+  @page{margin:12mm 10mm;size:A4 landscape}
+}
+.print-header{display:none;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid #1e1b4b}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script>
+const {useState,useMemo,useRef,useEffect,useCallback}=React;
+const h=React.createElement;
+
+/* ─── STORAGE ──────────────────────────────────────────────── */
+const SKEY='rfq_system_v3';
+function loadState(){try{const s=localStorage.getItem(SKEY);return s?JSON.parse(s):null;}catch{return null;}}
+function saveState(s){try{localStorage.setItem(SKEY,JSON.stringify(s));}catch{}}
+
+/* ─── DEFAULTS ─────────────────────────────────────────────── */
+const DEF_THEME={
+  hBg:'#1e1b4b',hTxt:'#ffffff',acc:'#6366f1',accTxt:'#ffffff',
+  apBg:'#dcfce7',apTx:'#166534',caBg:'#fee2e2',caTx:'#991b1b',
+  coBg:'#d1fae5',coTx:'#065f46',peBg:'#fef3c7',peTx:'#92400e',
+  deBg:'#dbeafe',deTx:'#1e40af',
+  logo:'',logoSize:36,loginLogoSize:60,cname:'RFQ Tracking System',tag:'RAB-R457-01',
+  enqPrefix:'ENQ',enqPad:3,enqUseFY:true,
+  quotPrefix:'RI-IND',quotPad:3,quotUseFY:true,
+  recordsTitle:'RFQ Records'
+};
+
+const DEF_COLS=[
+  {id:'slNo',label:'#',visible:true,width:50,locked:true},
+  {id:'customer',label:'Customer',visible:true,width:180},
+  {id:'enquiryDate',label:'Enquiry Date',visible:true,width:120,type:'date'},
+  {id:'enquiryNo',label:'Enquiry No',visible:true,width:130},
+  {id:'enquiryQty',label:'Qty',visible:true,width:70,align:'right'},
+  {id:'quotationNo',label:'Quotation No',visible:true,width:150},
+  {id:'quotationDate',label:'Quot. Date',visible:false,width:110,type:'date'},
+  {id:'costReceivedDate',label:'Cost Rcvd Date',visible:false,width:130,type:'date'},
+  {id:'status',label:'Status',visible:true,width:160,type:'status'},
+  {id:'koDate',label:'KO Date',visible:true,width:110,type:'date'},
+  {id:'koQty',label:'KO Qty',visible:false,width:70,align:'right'},
+  {id:'poNo',label:'PO No',visible:true,width:140},
+  {id:'poDate',label:'PO Date',visible:true,width:110,type:'date'},
+  {id:'poQty',label:'PO Qty',visible:false,width:70,align:'right'},
+  {id:'customerETA',label:'Delivery / ETA',visible:true,width:130,type:'date'},
+  {id:'productionStartDate',label:'Prod. Start',visible:false,width:110,type:'date'},
+  {id:'dispatchDate',label:'Dispatch Date',visible:true,width:120,type:'date'},
+  {id:'dispatchQty',label:'Disp. Qty',visible:false,width:80,align:'right'},
+  {id:'invNo',label:'Invoice No',visible:false,width:120},
+  {id:'invDate',label:'Invoice Date',visible:false,width:110,type:'date'},
+  {id:'invQty',label:'Invoice Qty',visible:false,width:80,align:'right'},
+  {id:'remarks',label:'Remarks',visible:true,width:150},
+];
+
+const DEF_USERS=[
+  {id:1,username:'admin',password:'admin123',role:'Admin',name:'Administrator',active:true},
+  {id:2,username:'sales',password:'sales123',role:'Sales',name:'Sales User',active:true},
+  {id:3,username:'viewer',password:'view123',role:'Viewer',name:'Viewer User',active:true},
+];
+
+const DEF_CUSTS=[
+  'Foxconn (Hyderabad)','Pegatron (Chennai)','TATA Electronics (Hosur)',
+  'Foxconn (Chennai)','TEAL (Hosur)','Salcomp (Chennai)','Bharath Forge (Pune)',
+  'CHANG YI INTERCONNECT TECHNOLOGY','FXCN','TEMD'
+];
+
+const STATUSES=['KO Approved','Cancelled','Waiting for Customer Feedback','Pending','Complete','Dispatched'];
+const ROLES=['Admin','Manager','Sales','Viewer'];
+
+const DEF_RECS=[
+  {id:1,slNo:1,customer:'Foxconn (Hyderabad)',enquiryDate:'2025-06-16',enquiryNo:'ENQ/016',enquiryQty:227,quotationNo:'RI-IND-165/25-26',quotationDate:'2025-06-14',status:'KO Approved',koDate:'2025-06-20',koQty:227,poNo:'182360000153',poDate:'2025-06-20',poQty:219,customerETA:'2025-07-16',productionStartDate:'2025-06-21',dispatchDate:'2025-07-12',dispatchQty:227,remarks:'Complete'},
+  {id:2,slNo:2,customer:'Foxconn (Hyderabad)',enquiryDate:'2025-07-18',enquiryNo:'ENQ/023',enquiryQty:192,quotationNo:'RI-IND-173/25/26',quotationDate:'2025-07-18',status:'KO Approved',koDate:'2025-06-28',koQty:192,poNo:'182570000003',poDate:'2025-07-28',poQty:192,customerETA:'2025-07-30',productionStartDate:'2025-07-29',dispatchDate:'2025-08-05',dispatchQty:192,remarks:'Complete'},
+  {id:3,slNo:3,customer:'TEAL (Hosur)',enquiryDate:'2025-07-22',enquiryNo:'ENQ/026',enquiryQty:2,quotationNo:'RI-IND-176/25-26',quotationDate:'2025-07-23',status:'KO Approved',koDate:'2025-07-23',koQty:2,poNo:'20409235',poDate:'',poQty:'',customerETA:'2025-07-28',productionStartDate:'2025-07-23',dispatchDate:'2025-07-26',dispatchQty:2,remarks:'Dispatched'},
+  {id:4,slNo:4,customer:'Salcomp (Chennai)',enquiryDate:'2026-04-01',enquiryNo:'ENQ/001/26-27',enquiryQty:4,quotationNo:'RI-IND-001/26-27',quotationDate:'2026-04-05',status:'Cancelled',koDate:'',koQty:'',poNo:'',poDate:'',poQty:'',customerETA:'',productionStartDate:'',dispatchDate:'',dispatchQty:'',remarks:'RAB cost Higher'},
+  {id:5,slNo:5,customer:'Bharath Forge (Pune)',enquiryDate:'2026-04-03',enquiryNo:'ENQ/005/26-27',enquiryQty:13,quotationNo:'RI-IND-005/26-27',quotationDate:'2026-04-06',status:'KO Approved',koDate:'',koQty:13,poNo:'',poDate:'',poQty:'',customerETA:'',productionStartDate:'',dispatchDate:'',dispatchQty:'',remarks:''},
+  {id:6,slNo:6,customer:'Pegatron (Chennai)',enquiryDate:'2025-03-13',enquiryNo:'ENQ/001',enquiryQty:'',quotationNo:'FP-IND-134/24-25',quotationDate:'2025-03-15',status:'KO Approved',koDate:'',koQty:'',poNo:'',poDate:'2025-08-17',poQty:'',customerETA:'2025-08-17',productionStartDate:'2025-03-18',dispatchDate:'',dispatchQty:'',remarks:''},
+  {id:7,slNo:7,customer:'Foxconn (Hyderabad)',enquiryDate:'2025-12-22',enquiryNo:'ENQ/127',enquiryQty:48,quotationNo:'RI-IND-275/25-26',quotationDate:'2026-01-06',status:'KO Approved',koDate:'2026-01-06',koQty:48,poNo:'',poDate:'',poQty:48,customerETA:'2026-03-15',productionStartDate:'2025-12-22',dispatchDate:'',dispatchQty:'',remarks:''},
+  {id:8,slNo:8,customer:'TATA Electronics (Hosur)',enquiryDate:'2025-04-26',enquiryNo:'ENQ/019',enquiryQty:'',quotationNo:'RI-IND-168/25-26',quotationDate:'2025-05-14',status:'KO Approved',koDate:'',koQty:'',poNo:'',poDate:'2025-06-19',poQty:'',customerETA:'2025-07-23',productionStartDate:'2025-04-27',dispatchDate:'2025-05-02',dispatchQty:'',remarks:''},
+  {id:9,slNo:9,customer:'CHANG YI INTERCONNECT TECHNOLOGY',enquiryDate:'2025-03-13',enquiryNo:'172360000065',enquiryQty:'',quotationNo:'FP-IND-0093-24',quotationDate:'2025-03-15',status:'KO Approved',koDate:'',koQty:'',poNo:'2FBD-P20246',poDate:'',poQty:'',customerETA:'',productionStartDate:'2025-03-18',dispatchDate:'',dispatchQty:'',remarks:''},
+  {id:10,slNo:10,customer:'Foxconn (Hyderabad)',enquiryDate:'2026-04-07',enquiryNo:'ENQ/021/26-27',enquiryQty:2,quotationNo:'RI-IND-021/26-27',quotationDate:'2026-04-09',status:'Pending',koDate:'',koQty:'',poNo:'',poDate:'',poQty:'',customerETA:'',productionStartDate:'',dispatchDate:'',dispatchQty:'',remarks:''},
+];
+
+/* ─── HELPERS ──────────────────────────────────────────────── */
+function fmt(d){if(!d)return'—';try{const dt=new Date(d);if(isNaN(dt))return d;return dt.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}catch{return d}}
+function ini(s){return(s||'?').split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()}
+
+function SBadge({s,t}){
+  const m={'KO Approved':{bg:t.apBg,tc:t.apTx},'Cancelled':{bg:t.caBg,tc:t.caTx},'Complete':{bg:t.coBg,tc:t.coTx},'Dispatched':{bg:t.coBg,tc:t.coTx},'Pending':{bg:t.peBg,tc:t.peTx},'Waiting for Customer Feedback':{bg:t.peBg,tc:t.peTx}};
+  const{bg,tc}=m[s]||{bg:t.deBg,tc:t.deTx};
+  return h('span',{className:'badge',style:{background:bg,color:tc}},s||'—');
+}
+function RBadge({r}){
+  const m={Admin:{bg:'#fef3c7',tc:'#92400e'},Manager:{bg:'#dbeafe',tc:'#1e40af'},Sales:{bg:'#dcfce7',tc:'#166534'},Viewer:{bg:'#f3f4f6',tc:'#374151'}};
+  const{bg,tc}=m[r]||m.Viewer;
+  return h('span',{className:'badge',style:{background:bg,color:tc}},r);
+}
+
+function CRow({label,k,t,setT}){
+  return h('div',{className:'crow'},
+    h('span',{style:{fontSize:12,color:'#374151'}},label),
+    h('div',{style:{display:'flex',alignItems:'center',gap:8}},
+      h('input',{type:'color',value:t[k]||'#000000',onChange:e=>setT(x=>({...x,[k]:e.target.value}))}),
+      h('code',{style:{fontSize:10,color:'#9ca3af'}},t[k])
+    )
+  );
+}
+
+function Fld({label,name,type='text',opts,fd,set,required}){
+  return h('div',{className:'igrp'},
+    h('label',null,label+(required?' *':'')),
+    opts?h('select',{value:fd[name]||'',onChange:e=>set(f=>({...f,[name]:e.target.value}))},
+      opts.map(o=>h('option',{key:o,value:o},o)))
+    :h('input',{type,value:fd[name]||'',onChange:e=>set(f=>({...f,[name]:e.target.value}))})
+  );
+}
+
+function PwIn({label,fk,fd,set,show,onToggle}){
+  return h('div',{className:'igrp'},
+    h('label',null,label),
+    h('div',{className:'pwr'},
+      h('input',{type:show?'text':'password',value:fd[fk]||'',onChange:e=>set(f=>({...f,[fk]:e.target.value})),autoComplete:'new-password'}),
+      h('button',{className:'eb',onClick:onToggle,tabIndex:-1},h('i',{className:show?'ti ti-eye-off':'ti ti-eye'}))
+    )
+  );
+}
+
+/* ─── EXPORT / PRINT / EMAIL UTILS ─────────────────────────── */
+function toCSV(rows,cols){
+  const hdr=cols.map(c=>'"'+c.label+'"').join(',');
+  const body=rows.map(r=>cols.map(c=>{
+    const v=r[c.id];
+    if(v===null||v===undefined||v==='')return '""';
+    return '"'+String(v).replace(/"/g,'""')+'"';
+  }).join(',')).join('\n');
+  return hdr+'\n'+body;
+}
+
+function downloadCSV(rows,cols,filename){
+  const blob=new Blob([toCSV(rows,cols)],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);
+}
+
+function downloadXLSX(rows,cols,filename,companyName,tag){
+  const XLSX=window.XLSX;
+  // Build worksheet data
+  const wsData=[];
+  // Header rows
+  wsData.push([companyName||'RFQ Tracking System','','','','','','','','','']);
+  wsData.push([tag||'','','','','','','','','','']);
+  wsData.push([]);
+  wsData.push(cols.map(c=>c.label));
+  rows.forEach(r=>wsData.push(cols.map(c=>{
+    const v=r[c.id];
+    if(c.type==='date'&&v){const d=new Date(v);return isNaN(d)?v:d;}
+    return v===null||v===undefined?'':v;
+  })));
+  const ws=XLSX.utils.aoa_to_sheet(wsData);
+  // Column widths
+  ws['!cols']=cols.map(c=>({wch:Math.max(12,(c.label||'').length+4)}));
+  // Merge title row
+  ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:Math.min(9,cols.length-1)}}];
+  // Style header row (row index 3)
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'RFQ Records');
+  XLSX.writeFile(wb,filename);
+}
+
+function ExportMenu({filtered,visibleCols,theme}){
+  const[open,setOpen]=useState(false);
+  const ref=useRef(null);
+  useEffect(()=>{
+    const handler=e=>{if(ref.current&&!ref.current.contains(e.target))setOpen(false);};
+    document.addEventListener('mousedown',handler);
+    return()=>document.removeEventListener('mousedown',handler);
+  },[]);
+
+  const today=new Date().toISOString().split('T')[0];
+  const fname='RFQ_Export_'+today;
+
+  return h('div',{className:'dropdown-wrap',ref},
+    h('button',{onClick:()=>setOpen(o=>!o),style:{display:'flex',alignItems:'center',gap:5,border:'1px solid #d1fae5',color:'#065f46',background:'#f0fdf4'}},
+      h('i',{className:'ti ti-download'}),'Export',h('i',{className:'ti ti-chevron-down',style:{fontSize:11}})
+    ),
+    open&&h('div',{className:'dropdown-menu'},
+      h('div',{style:{fontSize:11,fontWeight:700,color:'#9ca3af',padding:'4px 12px 6px',textTransform:'uppercase',letterSpacing:'.05em'}},
+        filtered.length+' records'),
+      h('button',{className:'dropdown-item',onClick:()=>{downloadXLSX(filtered,visibleCols,fname+'.xlsx',theme.cname,theme.tag);setOpen(false);}},
+        h('i',{className:'ti ti-file-spreadsheet',style:{color:'#166534'}}),h('span',null,'Export as Excel (.xlsx)')),
+      h('button',{className:'dropdown-item',onClick:()=>{downloadCSV(filtered,visibleCols,fname+'.csv');setOpen(false);}},
+        h('i',{className:'ti ti-file-text',style:{color:'#1d4ed8'}}),h('span',null,'Export as CSV')),
+      h('div',{style:{borderTop:'1px solid #f3f4f6',margin:'4px 0'}}),
+      h('button',{className:'dropdown-item',onClick:()=>{
+        // Copy table as tab-separated for paste into Excel
+        const tsv=[visibleCols.map(c=>c.label).join('\t'),...filtered.map(r=>visibleCols.map(c=>r[c.id]||'').join('\t'))].join('\n');
+        navigator.clipboard.writeText(tsv).then(()=>alert('Table copied! Paste into Excel with Ctrl+V.'));
+        setOpen(false);
+      }},
+        h('i',{className:'ti ti-clipboard-copy',style:{color:'#7c3aed'}}),h('span',null,'Copy table to clipboard'))
+    )
+  );
+}
+
+/* ─── EXCEL UPLOAD ─────────────────────────────────────────── */
+function ExcelUpload({onImport,onClose,custs,setCusts}){
+  const[status,setStatus]=useState('idle'); // idle | parsing | preview | done | error
+  const[rows,setRows]=useState([]);
+  const[errMsg,setErrMsg]=useState('');
+  const[dupMode,setDupMode]=useState('skip'); // skip | replace | append
+  const[sheetNames,setSheetNames]=useState([]);
+  const[selSheet,setSelSheet]=useState('');
+  const[wbRef,setWbRef]=useState(null);
+  const fileRef=useRef(null);
+
+  // Column header synonyms → internal field names
+  const COL_MAP={
+    'sl no':'slNo','sl.no':'slNo',
+    'customer name':'customer','customer':'customer',
+    'inquiry date':'enquiryDate','enquiry date':'enquiryDate',
+    'enquiry no':'enquiryNo','enquiry no.':'enquiryNo',
+    'enquiry qty':'enquiryQty','enquiry quantity':'enquiryQty',
+    'cost received date':'costReceivedDate',
+    'quotation no':'quotationNo','quotation no.':'quotationNo','quot. no':'quotationNo',
+    'quotation date':'quotationDate','quot. date':'quotationDate',
+    'status':'status',
+    'ko date':'koDate','k.o date':'koDate',
+    'ko qty':'koQty','k.o qty':'koQty',
+    'cus.eta':'customerETA','customer eta':'customerETA','customer expected date':'customerETA',
+    'po no':'poNo','po no.':'poNo','p.o no':'poNo',
+    'po date':'poDate',
+    'po qty':'poQty',
+    'inv.no':'invNo','invoice no':'invNo','inv no':'invNo',
+    'inv.date':'invDate','invoice date':'invDate',
+    'inv.qty':'invQty','invoice qty':'invQty',
+    'mass production date':'productionStartDate','production start date':'productionStartDate','production start':'productionStartDate',
+    'dispatch date':'dispatchDate','diapatch date':'dispatchDate','despatch date':'dispatchDate',
+    'dispatch qty':'dispatchQty','dispatch quantity':'dispatchQty',
+    'remarks':'remarks','remark':'remarks',
+  };
+
+  function norm(s){return String(s||'').toLowerCase().replace(/\n/g,' ').trim();}
+
+  function fmtDate(v){
+    if(!v||v==='-'||v==='NaN')return '';
+    if(v instanceof Date){if(isNaN(v))return '';return v.toISOString().split('T')[0];}
+    const s=String(v).trim();
+    // try parse various formats
+    const patterns=[
+      /^(\d{4})-(\d{2})-(\d{2})/,   // 2025-06-16
+      /^(\d{2})\.(\d{2})\.(\d{4})/,  // 20.06.2025
+      /^(\d{2})-(\d{2})-(\d{4})/,   // 16-06-2025
+      /^(\d{2})\/(\d{2})\/(\d{4})/,  // 16/06/2025
+    ];
+    for(const p of patterns){const m=s.match(p);if(m){
+      if(p.source.startsWith('^(\\d{4})')){return m[0].slice(0,10);}
+      return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+    }}
+    // Excel serial number
+    const n=parseFloat(s);
+    if(!isNaN(n)&&n>40000&&n<60000){
+      const d=new Date(Date.UTC(1899,11,30)+n*86400000);
+      return d.toISOString().split('T')[0];
+    }
+    return '';
+  }
+
+  function parseSheet(wb,sheetName){
+    // use SheetJS
+    const XLSX=window.XLSX;
+    const ws=wb.Sheets[sheetName];
+    const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:false,dateNF:'yyyy-mm-dd'});
+    // find header row (row containing "Customer Name" or "Sl No")
+    let headerRow=-1;
+    for(let i=0;i<Math.min(raw.length,8);i++){
+      const r=raw[i];
+      if(!r)continue;
+      const joined=r.map(c=>norm(c)).join(' ');
+      if(joined.includes('customer')&&(joined.includes('enquiry')||joined.includes('inquiry'))){headerRow=i;break;}
+    }
+    if(headerRow===-1){setErrMsg('Could not find header row with Customer Name / Enquiry columns.');setStatus('error');return;}
+    const headers=raw[headerRow].map(h=>COL_MAP[norm(h)]||null);
+    const parsed=[];
+    for(let i=headerRow+1;i<raw.length;i++){
+      const r=raw[i];
+      if(!r||r.every(v=>v===null||v===undefined||String(v).trim()===''||v==='-'))continue;
+      const obj={};
+      headers.forEach((field,ci)=>{if(field){let v=r[ci];if(v===null||v===undefined||v==='-')v='';obj[field]=v;}});
+      if(!obj.customer&&!obj.enquiryNo)continue; // skip blank rows
+      // format dates
+      ['enquiryDate','quotationDate','koDate','poDate','customerETA','productionStartDate','dispatchDate','invDate','costReceivedDate'].forEach(f=>{
+        if(obj[f]!==undefined)obj[f]=fmtDate(obj[f]);
+      });
+      // clean numbers
+      ['enquiryQty','koQty','poQty','dispatchQty','invQty'].forEach(f=>{
+        if(obj[f]!==undefined){const n=parseFloat(String(obj[f]).replace(/,/g,''));obj[f]=isNaN(n)?'':n;}
+      });
+      // clean string vals
+      ['customer','enquiryNo','quotationNo','poNo','invNo','status','remarks'].forEach(f=>{
+        if(obj[f]!==undefined)obj[f]=String(obj[f]||'').trim();
+      });
+      obj._sheet=sheetName;
+      parsed.push(obj);
+    }
+    setRows(parsed);
+    setStatus('preview');
+  }
+
+  function handleFile(file){
+    if(!file)return;
+    setStatus('parsing');setErrMsg('');setRows([]);
+    const reader=new FileReader();
+    reader.onload=e=>{
+      try{
+        const XLSX=window.XLSX;
+        const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
+        setWbRef(wb);
+        // prefer REV-01 or Total List or April sheet
+        const preferred=['REV-01 APR-26-27','Total List','April 26-27','JULY','JAN-26 _1','Sheet1','JUNE','MAY'];
+        const available=wb.SheetNames;
+        setSheetNames(available);
+        const best=preferred.find(s=>available.includes(s))||available[0];
+        setSelSheet(best);
+        parseSheet(wb,best);
+      }catch(err){setErrMsg('Error reading file: '+err.message);setStatus('error');}
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function switchSheet(name){setSelSheet(name);if(wbRef)parseSheet(wbRef,name);}
+
+  function doImport(){
+    const newCusts=[...custs];
+    let added=0,skipped=0,replaced=0;
+    const importedRows=rows.map((r,i)=>({
+      ...r,id:Date.now()+i,slNo:i+1,
+    }));
+    // collect new customers
+    importedRows.forEach(r=>{if(r.customer&&!newCusts.includes(r.customer))newCusts.push(r.customer);});
+    setCusts(newCusts);
+    onImport(importedRows,dupMode);
+    setStatus('done');
+  }
+
+  return h('div',{className:'modal-bg',onClick:e=>e.target===e.currentTarget&&onClose()},
+    h('div',{className:'modal',style:{maxWidth:760}},
+      h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1.25rem'}},
+        h('div',null,
+          h('h3',{style:{margin:'0 0 2px',fontSize:16,fontWeight:700}},'Import from Excel'),
+          h('p',{style:{margin:0,fontSize:12,color:'var(--sec)'}},'Upload your RFQ tracking Excel file — all sheets supported')
+        ),
+        h('button',{onClick:onClose,className:'btn-ghost',style:{padding:'4px 8px'}},'✕')
+      ),
+
+      status==='done'&&h('div',{style:{textAlign:'center',padding:'2rem'}},
+        h('div',{style:{width:56,height:56,borderRadius:'50%',background:'#dcfce7',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 12px'}},h('i',{className:'ti ti-check',style:{fontSize:28,color:'#166534'}})),
+        h('h3',{style:{fontSize:16,fontWeight:700,color:'#166534',margin:'0 0 4px'}},'Import Complete!'),
+        h('p',{style:{color:'var(--sec)',fontSize:13}},rows.length+' records imported from "'+selSheet+'"'),
+        h('button',{onClick:onClose,className:'btn-primary',style:{marginTop:12}},'Close')
+      ),
+
+      status==='idle'&&h('div',null,
+        h('div',{onClick:()=>fileRef.current.click(),style:{border:'2px dashed #c7d2fe',borderRadius:12,padding:'3rem',textAlign:'center',cursor:'pointer',background:'#f5f3ff',transition:'all .15s'},
+          onDragOver:e=>{e.preventDefault();e.currentTarget.style.borderColor='#6366f1';},
+          onDragLeave:e=>{e.currentTarget.style.borderColor='#c7d2fe';},
+          onDrop:e=>{e.preventDefault();e.currentTarget.style.borderColor='#c7d2fe';const f=e.dataTransfer.files[0];if(f)handleFile(f);}
+        },
+          h('i',{className:'ti ti-file-spreadsheet',style:{fontSize:48,color:'#6366f1',display:'block',marginBottom:12}}),
+          h('p',{style:{fontSize:15,fontWeight:600,color:'#3730a3',margin:'0 0 4px'}},'Click to browse or drag & drop'),
+          h('p',{style:{fontSize:12,color:'var(--sec)',margin:0}},'Supports .xlsx and .xls files · All sheets auto-detected')
+        ),
+        h('input',{type:'file',ref:fileRef,accept:'.xlsx,.xls',style:{display:'none'},onChange:e=>handleFile(e.target.files[0])})
+      ),
+
+      status==='parsing'&&h('div',{style:{textAlign:'center',padding:'2rem'}},
+        h('i',{className:'ti ti-loader-2',style:{fontSize:40,color:'var(--acc)',animation:'spin 1s linear infinite',display:'block',marginBottom:12}}),
+        h('p',{style:{color:'var(--sec)'}}, 'Reading Excel file…'),
+        h('style',null,'@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}')
+      ),
+
+      status==='error'&&h('div',{style:{background:'#fee2e2',border:'1px solid #fca5a5',borderRadius:10,padding:'1rem',textAlign:'center'}},
+        h('i',{className:'ti ti-alert-circle',style:{fontSize:28,color:'#dc2626',marginBottom:8,display:'block'}}),
+        h('p',{style:{color:'#991b1b',fontWeight:600,margin:'0 0 4px'}},'Import Error'),
+        h('p',{style:{color:'#991b1b',fontSize:13,margin:'0 0 12px'}},errMsg),
+        h('button',{onClick:()=>{setStatus('idle');setErrMsg('');},className:'btn-primary'},'Try Again')
+      ),
+
+      status==='preview'&&h('div',null,
+        /* Sheet selector */
+        sheetNames.length>1&&h('div',{style:{marginBottom:12}},
+          h('label',{style:{fontSize:11,fontWeight:700,color:'var(--sec)',textTransform:'uppercase',letterSpacing:'.05em',display:'block',marginBottom:6}},'Sheet'),
+          h('div',{style:{display:'flex',gap:6,flexWrap:'wrap'}},
+            sheetNames.filter(s=>!['Sheet2','Sheet3'].includes(s)).map(s=>
+              h('button',{key:s,onClick:()=>switchSheet(s),style:{fontSize:12,padding:'4px 10px',background:selSheet===s?'var(--acc)':'var(--card)',color:selSheet===s?'#fff':'var(--txt)',borderColor:selSheet===s?'var(--acc)':'var(--border)',borderRadius:6}},s)
+            )
+          )
+        ),
+        /* Summary */
+        h('div',{style:{background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:9,padding:'10px 14px',marginBottom:12,display:'flex',alignItems:'center',gap:10}},
+          h('i',{className:'ti ti-table',style:{color:'#166534',fontSize:20}}),
+          h('div',null,
+            h('span',{style:{fontWeight:700,color:'#166534',fontSize:14}},rows.length+' records'),
+            h('span',{style:{color:'#166534',fontSize:13}},' detected in sheet "'+selSheet+'"'),
+            h('div',{style:{fontSize:12,color:'#166534',marginTop:2}},
+              [...new Set(rows.map(r=>r.customer).filter(Boolean))].length+' unique customers · '+rows.filter(r=>r.enquiryNo).length+' with Enquiry No · '+rows.filter(r=>r.status).length+' with Status')
+          )
+        ),
+        /* Duplicate handling */
+        h('div',{style:{marginBottom:12}},
+          h('label',{style:{fontSize:11,fontWeight:700,color:'var(--sec)',textTransform:'uppercase',letterSpacing:'.05em',display:'block',marginBottom:6}},'If records already exist'),
+          h('div',{style:{display:'flex',gap:8}},
+            [['skip','Skip duplicates'],['replace','Replace existing'],['append','Append all']].map(([v,l])=>
+              h('button',{key:v,onClick:()=>setDupMode(v),style:{fontSize:12,padding:'5px 12px',background:dupMode===v?'var(--acc)':'var(--card)',color:dupMode===v?'#fff':'var(--txt)',borderColor:dupMode===v?'var(--acc)':'var(--border)',borderRadius:6}},l)
+            )
+          )
+        ),
+        /* Preview table */
+        h('div',{style:{overflowX:'auto',border:'1px solid var(--border)',borderRadius:10,maxHeight:240}},
+          h('table',{style:{minWidth:700}},
+            h('thead',null,h('tr',{style:{background:'var(--thbg)',position:'sticky',top:0}},
+              ['Sl','Customer','Enquiry Date','Enquiry No','Quotation No','Status','KO Date','Delivery ETA','Dispatch Date'].map(hd=>
+                h('th',{key:hd,style:{padding:'8px 10px',fontSize:11,fontWeight:700,color:'var(--thtxt)',whiteSpace:'nowrap',textTransform:'uppercase'}},hd)
+              )
+            )),
+            h('tbody',null,
+              rows.slice(0,50).map((r,i)=>h('tr',{key:i,style:{background:i%2===0?'#fff':'var(--alt)'}},
+                h('td',{style:{padding:'6px 10px',fontSize:12,color:'#9ca3af'}},r.slNo||i+1),
+                h('td',{style:{padding:'6px 10px',fontSize:13,fontWeight:600,whiteSpace:'nowrap'}},r.customer||'—'),
+                h('td',{style:{padding:'6px 10px',fontSize:12,color:'var(--sec)',whiteSpace:'nowrap'}},r.enquiryDate||'—'),
+                h('td',{style:{padding:'6px 10px',fontSize:12,fontFamily:'monospace',color:'#3730a3'}},r.enquiryNo||'—'),
+                h('td',{style:{padding:'6px 10px',fontSize:12,fontFamily:'monospace',color:'var(--acc)'}},r.quotationNo||'—'),
+                h('td',{style:{padding:'6px 10px'}},r.status?h('span',{className:'badge',style:{background:'#dcfce7',color:'#166534',fontSize:11}},r.status):'—'),
+                h('td',{style:{padding:'6px 10px',fontSize:12,color:'var(--sec)',whiteSpace:'nowrap'}},r.koDate||'—'),
+                h('td',{style:{padding:'6px 10px',fontSize:12,color:'var(--sec)',whiteSpace:'nowrap'}},r.customerETA||'—'),
+                h('td',{style:{padding:'6px 10px',fontSize:12,color:'var(--sec)',whiteSpace:'nowrap'}},r.dispatchDate||'—')
+              )),
+              rows.length>50&&h('tr',null,h('td',{colSpan:9,style:{padding:'8px 12px',textAlign:'center',fontSize:12,color:'var(--sec)',fontStyle:'italic'}},`… and ${rows.length-50} more rows`))
+            )
+          )
+        ),
+        h('div',{style:{display:'flex',gap:8,marginTop:14,justifyContent:'space-between',alignItems:'center'}},
+          h('button',{onClick:()=>{setStatus('idle');setRows([]);},className:'btn-ghost',style:{fontSize:13}},h('i',{className:'ti ti-arrow-left'}),' Upload Different File'),
+          h('div',{style:{display:'flex',gap:8}},
+            h('button',{onClick:onClose},'Cancel'),
+            h('button',{onClick:doImport,className:'btn-primary',style:{fontSize:14,padding:'8px 22px'}},h('i',{className:'ti ti-file-import'}),' Import '+rows.length+' Records')
+          )
+        )
+      )
+    )
+  );
+}
+
+/* ─── COLUMN MANAGER ────────────────────────────────────────── */
+function ColManager({cols,setCols,onClose,isAdmin}){
+  const[items,setItems]=useState(cols.map(c=>({...c})));
+  const[dragIdx,setDragIdx]=useState(null);
+  const[overIdx,setOverIdx]=useState(null);
+  const[editId,setEditId]=useState(null);
+  const[editLabel,setEditLabel]=useState('');
+  const[newCol,setNewCol]=useState('');
+
+  const save=()=>{setCols(items);onClose();};
+
+  const toggle=id=>setItems(it=>it.map(c=>c.id===id&&!c.locked?{...c,visible:!c.visible}:c));
+
+  const startEdit=(id,label)=>{setEditId(id);setEditLabel(label);};
+  const saveLabel=()=>{
+    if(editLabel.trim())setItems(it=>it.map(c=>c.id===editId?{...c,label:editLabel.trim()}:c));
+    setEditId(null);
+  };
+
+  const addCol=()=>{
+    if(!newCol.trim())return;
+    const id='custom_'+Date.now();
+    setItems(it=>[...it,{id,label:newCol.trim(),visible:true,width:120,custom:true}]);
+    setNewCol('');
+  };
+
+  const delCol=id=>setItems(it=>it.filter(c=>c.id!==id));
+
+  const onDragStart=i=>{setDragIdx(i);};
+  const onDragOver=(e,i)=>{e.preventDefault();setOverIdx(i);};
+  const onDrop=i=>{
+    if(dragIdx===null||dragIdx===i)return;
+    const arr=[...items];
+    const[moved]=arr.splice(dragIdx,1);
+    arr.splice(i,0,moved);
+    setItems(arr);setDragIdx(null);setOverIdx(null);
+  };
+
+  return h('div',{className:'modal-bg',onClick:e=>e.target===e.currentTarget&&onClose()},
+    h('div',{className:'modal modal-md',style:{maxWidth:540}},
+      h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1.25rem'}},
+        h('h3',{style:{margin:0,fontSize:16,fontWeight:700}},'Customize Columns'),
+        h('button',{onClick:onClose,className:'btn-ghost',style:{padding:'4px 8px'}},'✕')
+      ),
+      h('p',{style:{fontSize:12,color:'#9ca3af',marginBottom:12}},'Drag to reorder · Click eye to show/hide · Click label to rename · Admin can add or remove columns.'),
+      h('div',{style:{maxHeight:340,overflowY:'auto',marginBottom:12}},
+        items.map((col,i)=>h('div',{
+          key:col.id,
+          className:`col-item${dragIdx===i?' dragging':''}${overIdx===i?' drag-over':''}`,
+          draggable:true,
+          onDragStart:()=>onDragStart(i),
+          onDragOver:e=>onDragOver(e,i),
+          onDrop:()=>onDrop(i),
+          onDragEnd:()=>{setDragIdx(null);setOverIdx(null);}
+        },
+          h('span',{className:'drag-handle'},h('i',{className:'ti ti-grip-vertical'})),
+          h('button',{onClick:()=>toggle(col.id),className:'btn-ghost',style:{padding:'2px 6px',color:col.visible?'#6366f1':'#9ca3af'}},
+            h('i',{className:col.visible?'ti ti-eye':'ti ti-eye-off'})),
+          editId===col.id
+            ?h('div',{style:{flex:1,display:'flex',gap:6}},
+                h('input',{value:editLabel,onChange:e=>setEditLabel(e.target.value),onKeyDown:e=>{if(e.key==='Enter')saveLabel();if(e.key==='Escape')setEditId(null);},autoFocus:true,style:{flex:1}}),
+                h('button',{onClick:saveLabel,className:'btn-primary',style:{padding:'3px 8px'}},'✓')
+              )
+            :h('span',{style:{flex:1,fontSize:13,color:col.visible?'#111':'#9ca3af',cursor:'pointer'},onClick:()=>isAdmin&&startEdit(col.id,col.label),title:isAdmin?'Click to rename':undefined},col.label),
+          col.locked?h('span',{style:{fontSize:11,color:'#9ca3af',padding:'2px 6px'}},h('i',{className:'ti ti-lock'}))
+            :isAdmin&&col.custom&&h('button',{onClick:()=>delCol(col.id),className:'btn-danger btn-ghost',style:{padding:'2px 6px'},title:'Remove column'},h('i',{className:'ti ti-trash'}))
+        ))
+      ),
+      isAdmin&&h('div',{style:{display:'flex',gap:8,marginBottom:'1rem',borderTop:'1px solid var(--border)',paddingTop:12}},
+        h('input',{value:newCol,onChange:e=>setNewCol(e.target.value),placeholder:'New column name…',onKeyDown:e=>e.key==='Enter'&&addCol()}),
+        h('button',{onClick:addCol,className:'btn-primary',style:{whiteSpace:'nowrap'}},h('i',{className:'ti ti-plus'}),' Add Column')
+      ),
+      h('div',{style:{display:'flex',gap:8,justifyContent:'flex-end'}},
+        h('button',{onClick:onClose},'Cancel'),
+        h('button',{onClick:save,className:'btn-primary'},'Save Layout')
+      )
+    )
+  );
+}
+
+/* ─── RECORD FORM ───────────────────────────────────────────── */
+function RecordForm({rec,custs,onSave,onClose,nextEnqNo,nextQuotNo}){
+  const[fd,setFd]=useState(rec?{...rec}:{
+    customer:custs[0]||'',status:'Pending',
+    enquiryDate:new Date().toISOString().split('T')[0],
+    enquiryNo:nextEnqNo,quotationNo:nextQuotNo
+  });
+  const[err,setErr]=useState('');
+
+  const save=()=>{
+    if(!fd.customer){setErr('Customer is required.');return;}
+    if(!fd.enquiryNo){setErr('Enquiry No is required.');return;}
+    onSave(fd);
+  };
+
+  // Read-only auto field display
+  const AutoField=({label,name})=>h('div',{className:'igrp'},
+    h('label',null,label),
+    h('div',{style:{background:'#f9fafb',border:'1px solid var(--border)',borderRadius:7,padding:'7px 10px',fontSize:13,color:'#374151',display:'flex',alignItems:'center',justifyContent:'space-between',gap:8}},
+      h('span',{style:{fontWeight:600,fontFamily:'monospace',letterSpacing:'.02em'}},fd[name]||'—'),
+      h('span',{className:'badge',style:{background:'#e0e7ff',color:'#3730a3',fontSize:10}},'Auto')
+    )
+  );
+
+  return h('div',{className:'modal-bg',onClick:e=>e.target===e.currentTarget&&onClose()},
+    h('div',{className:'modal'},
+      h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1.25rem'}},
+        h('h3',{style:{margin:0,fontSize:16,fontWeight:700,color:'var(--acc)'}},rec?'Edit Record':'New RFQ Record'),
+        h('button',{onClick:onClose,className:'btn-ghost',style:{padding:'4px 8px'}},'✕')
+      ),
+      err&&h('div',{style:{background:'#fee2e2',color:'#991b1b',borderRadius:8,padding:'9px 12px',fontSize:13,marginBottom:12}},h('i',{className:'ti ti-alert-circle'}),' ',err),
+      !rec&&h('div',{style:{background:'#eef2ff',border:'1px solid #c7d2fe',borderRadius:8,padding:'9px 12px',fontSize:13,color:'#3730a3',marginBottom:12,display:'flex',gap:6,alignItems:'center'}},
+        h('i',{className:'ti ti-sparkles'}),h('span',null,'Enquiry No and Quotation No are ',h('strong',null,'auto-generated'),' in sequence for this fiscal year.')),
+      h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}},
+        h(Fld,{label:'Customer',name:'customer',opts:custs,fd,set:setFd,required:true}),
+        h(Fld,{label:'Status',name:'status',opts:STATUSES,fd,set:setFd}),
+        h(Fld,{label:'Enquiry Date',name:'enquiryDate',type:'date',fd,set:setFd}),
+        rec?h(Fld,{label:'Enquiry No',name:'enquiryNo',fd,set:setFd,required:true}):h(AutoField,{label:'Enquiry No (Auto)',name:'enquiryNo'}),
+        h(Fld,{label:'Enquiry Qty',name:'enquiryQty',fd,set:setFd}),
+        rec?h(Fld,{label:'Quotation No',name:'quotationNo',fd,set:setFd}):h(AutoField,{label:'Quotation No (Auto)',name:'quotationNo'}),
+        h(Fld,{label:'Quotation Date',name:'quotationDate',type:'date',fd,set:setFd}),
+        h(Fld,{label:'Cost Received Date',name:'costReceivedDate',type:'date',fd,set:setFd}),
+        h(Fld,{label:'KO Date',name:'koDate',type:'date',fd,set:setFd}),
+        h(Fld,{label:'KO Qty',name:'koQty',fd,set:setFd}),
+        h(Fld,{label:'PO No',name:'poNo',fd,set:setFd}),
+        h(Fld,{label:'PO Date',name:'poDate',type:'date',fd,set:setFd}),
+        h(Fld,{label:'PO Qty',name:'poQty',fd,set:setFd}),
+        h(Fld,{label:'Customer ETA / Delivery Date',name:'customerETA',type:'date',fd,set:setFd}),
+        h(Fld,{label:'Production Start Date',name:'productionStartDate',type:'date',fd,set:setFd}),
+        h(Fld,{label:'Dispatch Date',name:'dispatchDate',type:'date',fd,set:setFd}),
+        h(Fld,{label:'Dispatch Qty',name:'dispatchQty',fd,set:setFd}),
+        h(Fld,{label:'Invoice No',name:'invNo',fd,set:setFd}),
+        h(Fld,{label:'Invoice Date',name:'invDate',type:'date',fd,set:setFd}),
+        h(Fld,{label:'Invoice Qty',name:'invQty',fd,set:setFd})
+      ),
+      h('div',{style:{marginTop:10,display:'flex',flexDirection:'column',gap:4}},
+        h('label',{style:{fontSize:11,fontWeight:700,color:'var(--sec)',textTransform:'uppercase',letterSpacing:'.05em'}},'Remarks'),
+        h('textarea',{value:fd.remarks||'',onChange:e=>setFd(f=>({...f,remarks:e.target.value})),rows:2,style:{width:'100%',resize:'vertical'}})
+      ),
+      h('div',{style:{display:'flex',gap:8,marginTop:'1.25rem',justifyContent:'flex-end'}},
+        h('button',{onClick:onClose},'Cancel'),
+        h('button',{onClick:save,className:'btn-primary',style:{fontSize:14}},rec?'Save Changes':'Add Record')
+      )
+    )
+  );
+}
+
+/* ─── MAIN APP ──────────────────────────────────────────────── */
+function App(){
+  const saved=loadState();
+
+  const[theme,setTheme]=useState(saved?.theme||DEF_THEME);
+  const[users,setUsers]=useState(saved?.users||DEF_USERS);
+  const[recs,setRecs]=useState(saved?.recs||DEF_RECS);
+  const[custs,setCusts]=useState(saved?.custs||DEF_CUSTS);
+  const[cols,setCols]=useState(saved?.cols||DEF_COLS);
+
+  const[user,setUser]=useState(null);
+  const[view,setView]=useState('dashboard');
+  const[lf,setLf]=useState({u:'',p:''});
+  const[showLPw,setShowLPw]=useState(false);
+  const[lErr,setLErr]=useState('');
+  const[toast,setToast]=useState(null);
+  const tRef=useRef(null);
+
+  const[showColMgr,setShowColMgr]=useState(false);
+  const[showExcel,setShowExcel]=useState(false);
+  const[showRecFm,setShowRecFm]=useState(false);
+  const[editRec,setEditRec]=useState(null);
+  const[showCustFm,setShowCustFm]=useState(false);
+  const[editCIdx,setEditCIdx]=useState(null);
+  const[cfd,setCfd]=useState('');
+  const[showUsrFm,setShowUsrFm]=useState(false);
+  const[editUsr,setEditUsr]=useState(null);
+  const[ufd,setUfd]=useState({});
+  const[showPwFm,setShowPwFm]=useState(false);
+  const[pwTarget,setPwTarget]=useState(null);
+  const[pwfd,setPwfd]=useState({old:'',n1:'',n2:''});
+  const[pwErr,setPwErr]=useState('');
+  const[pwSh,setPwSh]=useState({});
+  const[srch,setSrch]=useState('');
+  const[fSt,setFSt]=useState('All');
+  const[fCu,setFCu]=useState('All');
+  const[adminTab,setAdminTab]=useState('users');
+  const logoRef=useRef(null);
+
+  const isAdmin=user?.role==='Admin';
+  const isViewer=user?.role==='Viewer';
+  const visibleCols=useMemo(()=>cols.filter(c=>c.visible),[cols]);
+
+  // persist all state changes
+  useEffect(()=>{
+    if(user)saveState({theme,users,recs,custs,cols});
+  },[theme,users,recs,custs,cols,user]);
+
+  const pop=(msg,warn)=>{setToast({msg,warn});clearTimeout(tRef.current);tRef.current=setTimeout(()=>setToast(null),2800);};
+
+  const doLogin=()=>{
+    const f=users.find(u=>u.username===lf.u&&u.password===lf.p&&u.active);
+    if(f){setUser(f);setLErr('');setView('dashboard');}else setLErr('Invalid username or password.');
+  };
+
+  // ── Auto-number helpers ──────────────────────────────────
+  function getFiscalYear(date){
+    const d=date?new Date(date):new Date();
+    const yr=d.getFullYear();const mo=d.getMonth()+1;
+    const startYr=mo>=4?yr:yr-1;
+    const s2=n=>String(n).slice(-2);
+    return s2(startYr)+'-'+s2(startYr+1);
+  }
+  function buildEnqNo(seq){
+    const fy=getFiscalYear();
+    const pad=theme.enqPad||3;
+    const seqStr=String(seq).padStart(pad,'0');
+    const prefix=theme.enqPrefix||'ENQ';
+    return theme.enqUseFY!==false?prefix+'/'+seqStr+'/'+fy:prefix+'/'+seqStr;
+  }
+  function buildQuotNo(seq){
+    const fy=getFiscalYear();
+    const pad=theme.quotPad||3;
+    const seqStr=String(seq).padStart(pad,'0');
+    const prefix=theme.quotPrefix||'RI-IND';
+    return theme.quotUseFY!==false?prefix+'-'+seqStr+'/'+fy:prefix+'-'+seqStr;
+  }
+  function nextEnqNo(){
+    const fy=getFiscalYear();
+    const pad=theme.enqPad||3;
+    const prefix=(theme.enqPrefix||'ENQ')+'/';
+    let max=0;
+    recs.forEach(r=>{
+      if(r.enquiryNo&&r.enquiryNo.startsWith(prefix)){
+        const parts=r.enquiryNo.split('/');
+        const n=parseInt(parts[1],10);
+        if(!isNaN(n))max=Math.max(max,n);
+      }
+    });
+    return buildEnqNo(max+1);
+  }
+  function nextQuotNo(){
+    const fy=getFiscalYear();
+    const pad=theme.quotPad||3;
+    const prefix=(theme.quotPrefix||'RI-IND')+'-';
+    let max=0;
+    recs.forEach(r=>{
+      if(r.quotationNo&&r.quotationNo.startsWith(prefix)){
+        const rest=r.quotationNo.slice(prefix.length);
+        const n=parseInt(rest.split('/')[0],10);
+        if(!isNaN(n))max=Math.max(max,n);
+      }
+    });
+    return buildQuotNo(max+1);
+  }
+
+  // Records
+  const saveRec=fd=>{
+    if(editRec){setRecs(rs=>rs.map(r=>r.id===editRec.id?{...fd,id:editRec.id}:r));pop('Record updated.');}
+    else{
+      const ni=Math.max(0,...recs.map(r=>r.id))+1;
+      const ns=Math.max(0,...recs.map(r=>r.slNo||0))+1;
+      setRecs(rs=>[...rs,{...fd,id:ni,slNo:ns}]);
+      pop('Record #'+ns+' added — '+fd.customer);
+    }
+    setShowRecFm(false);setView('records');
+  };
+  const delRec=id=>{if(window.confirm('Delete this record?')){setRecs(rs=>rs.filter(r=>r.id!==id));pop('Record deleted.','warn');}};
+
+  // ── Print ──────────────────────────────────────────────────
+  const doPrint=()=>{
+    // Make print header visible, hide non-print elements, print, restore
+    const ph=document.getElementById('rfq-print-header');
+    if(ph)ph.style.display='flex';
+    // Remove border/radius from print area for clean output
+    const pa=document.getElementById('rfq-print-area');
+    let origStyle='';
+    if(pa){origStyle=pa.style.cssText;pa.style.border='none';pa.style.borderRadius='0';pa.style.overflow='visible';}
+    setTimeout(()=>{
+      window.print();
+      if(ph)ph.style.display='';
+      if(pa&&origStyle!==undefined)pa.style.cssText=origStyle;
+    },120);
+  };
+
+  // ── Email ───────────────────────────────────────────────────
+  const doEmail=(rows,cols)=>{
+    const subject=encodeURIComponent((theme.cname||'RFQ Tracking')+' — Records Export '+new Date().toLocaleDateString('en-IN'));
+    // Build plain-text table for email body
+    const hdr=cols.map(c=>c.label).join(' | ');
+    const sep=cols.map(c=>'-'.repeat(c.label.length)).join('-+-');
+    const body_rows=rows.slice(0,30).map(r=>cols.map(c=>{
+      const v=r[c.id];
+      if(!v||v===null)return'—';
+      if(c.type==='date'&&v){try{return new Date(v).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});}catch{return v;}}
+      return String(v);
+    }).join(' | ')).join('\n');
+    const note=rows.length>30?`\n(Showing first 30 of ${rows.length} records. Export full Excel for complete data.)`:'';
+    const fullBody=`${theme.cname||'RFQ Tracking System'}\n${theme.tag||''}\nGenerated: ${new Date().toLocaleString('en-IN')}\n\n${hdr}\n${sep}\n${body_rows}${note}\n\nThis email was generated from the RFQ Tracking System.`;
+    const mailto=`mailto:?subject=${subject}&body=${encodeURIComponent(fullBody)}`;
+    window.location.href=mailto;
+  };
+
+  const handleExcelImport=(importedRows,dupMode)=>{
+    setRecs(prev=>{
+      if(dupMode==='replace'){
+        // replace records matching by enquiryNo, keep rest
+        const impNos=new Set(importedRows.map(r=>r.enquiryNo).filter(Boolean));
+        const kept=prev.filter(r=>!r.enquiryNo||!impNos.has(r.enquiryNo));
+        const merged=[...kept,...importedRows].map((r,i)=>({...r,id:i+1,slNo:i+1}));
+        return merged;
+      }
+      if(dupMode==='skip'){
+        const existNos=new Set(prev.map(r=>r.enquiryNo).filter(Boolean));
+        const newOnes=importedRows.filter(r=>!r.enquiryNo||!existNos.has(r.enquiryNo));
+        const merged=[...prev,...newOnes].map((r,i)=>({...r,id:i+1,slNo:i+1}));
+        return merged;
+      }
+      // append all
+      const merged=[...prev,...importedRows].map((r,i)=>({...r,id:i+1,slNo:i+1}));
+      return merged;
+    });
+    pop('Excel import complete — '+importedRows.length+' records loaded.');
+    setView('records');
+  };;
+
+  // Customers (auto-sync)
+  const saveCust=()=>{
+    const v=cfd.trim();if(!v)return;
+    if(editCIdx!==null){
+      const old=custs[editCIdx];
+      setRecs(rs=>rs.map(r=>r.customer===old?{...r,customer:v}:r));
+      setCusts(cs=>cs.map((x,i)=>i===editCIdx?v:x));
+      pop('Customer updated & synced to all records.');
+    }else{
+      if(custs.includes(v)){pop('Already exists.','warn');return;}
+      setCusts(cs=>[...cs,v]);pop('Customer added.');
+    }
+    setShowCustFm(false);
+  };
+  const delCust=i=>{
+    const n=custs[i];
+    if(recs.some(r=>r.customer===n)){window.alert('Cannot delete — customer has records.');return;}
+    if(window.confirm('Delete "'+n+'"?')){setCusts(cs=>cs.filter((_,j)=>j!==i));pop('Deleted.','warn');}
+  };
+
+  // Users
+  const saveUsr=()=>{
+    if(!ufd.name||!ufd.username||!ufd.role)return;
+    if(editUsr){setUsers(us=>us.map(u=>u.id===editUsr.id?{...u,...ufd}:u));if(user.id===editUsr.id)setUser(u=>({...u,...ufd}));pop('User updated.');}
+    else{if(!ufd.password){pop('Password required.','warn');return;}const ni=Math.max(0,...users.map(u=>u.id))+1;setUsers(us=>[...us,{id:ni,...ufd,active:true}]);pop('User created.');}
+    setShowUsrFm(false);
+  };
+  const savePw=()=>{
+    setPwErr('');
+    const isOther=isAdmin&&pwTarget&&pwTarget.id!==user.id;
+    if(!isOther&&pwfd.old!==user.password){setPwErr('Current password incorrect.');return;}
+    if(!pwfd.n1){setPwErr('New password required.');return;}
+    if(pwfd.n1!==pwfd.n2){setPwErr('Passwords do not match.');return;}
+    setUsers(us=>us.map(u=>u.id===(isOther?pwTarget.id:user.id)?{...u,password:pwfd.n1}:u));
+    if(!isOther)setUser(u=>({...u,password:pwfd.n1}));
+    pop('Password changed.');setShowPwFm(false);
+  };
+
+  const handleLogo=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>setTheme(t=>({...t,logo:ev.target.result}));r.readAsDataURL(f);pop('Logo updated.');};
+
+  const filtered=useMemo(()=>recs.filter(r=>{
+    const ms=!srch||[r.customer,r.enquiryNo,r.quotationNo,r.poNo,r.remarks].some(v=>v&&String(v).toLowerCase().includes(srch.toLowerCase()));
+    return ms&&(fSt==='All'||r.status===fSt)&&(fCu==='All'||r.customer===fCu);
+  }),[recs,srch,fSt,fCu]);
+
+  const stats=useMemo(()=>({
+    total:recs.length,
+    ap:recs.filter(r=>r.status==='KO Approved').length,
+    ca:recs.filter(r=>r.status==='Cancelled').length,
+    co:recs.filter(r=>r.status==='Complete'||r.status==='Dispatched').length,
+    pe:recs.filter(r=>!r.status||r.status==='Pending'||r.status==='Waiting for Customer Feedback').length,
+  }),[recs]);
+
+  function renderCell(r,col){
+    if(col.id==='slNo')return h('td',{key:col.id,style:{padding:'7px 12px',color:'#9ca3af',fontSize:12,fontWeight:500,width:col.width}},r.slNo);
+    if(col.type==='status')return h('td',{key:col.id,style:{padding:'7px 12px',width:col.width}},h(SBadge,{s:r.status,t:theme}));
+    if(col.type==='date')return h('td',{key:col.id,style:{padding:'7px 12px',color:'var(--sec)',fontSize:12,whiteSpace:'nowrap',width:col.width}},fmt(r[col.id]));
+    if(col.align==='right')return h('td',{key:col.id,style:{padding:'7px 12px',textAlign:'right',fontSize:13,width:col.width}},r[col.id]||'—');
+    if(col.id==='customer')return h('td',{key:col.id,style:{padding:'7px 12px',fontWeight:600,fontSize:13,whiteSpace:'nowrap',width:col.width}},r[col.id]);
+    if(col.id==='quotationNo')return h('td',{key:col.id,style:{padding:'7px 12px',fontSize:12,color:'var(--acc)',whiteSpace:'nowrap',width:col.width}},r[col.id]||'—');
+    if(col.id==='remarks')return h('td',{key:col.id,style:{padding:'7px 12px',color:'var(--sec)',fontSize:12,maxWidth:150,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',width:col.width}},r[col.id]||'');
+    return h('td',{key:col.id,style:{padding:'7px 12px',fontSize:13,whiteSpace:'nowrap',width:col.width}},r[col.id]||'—');
+  }
+
+  /* ── LOGIN PAGE ── */
+  if(!user) return h('div',{style:{minHeight:'100vh',display:'flex',background:'linear-gradient(135deg,'+theme.hBg+' 0%,#4338ca 100%)'}},
+    h('div',{style:{flex:1,display:'flex',alignItems:'center',justifyContent:'center',padding:'2rem'}},
+      h('div',{style:{background:'#fff',borderRadius:16,padding:'2.5rem',width:'100%',maxWidth:400,boxShadow:'0 24px 64px rgba(0,0,0,.28)'}},
+        h('div',{style:{textAlign:'center',marginBottom:'2rem'}},
+          theme.logo
+            ?h('img',{src:theme.logo,style:{height:(theme.loginLogoSize||60),objectFit:'contain',marginBottom:14,borderRadius:8,display:'block',margin:'0 auto 14px',maxWidth:240,transition:'height .2s'}})
+            :h('div',{style:{width:60,height:60,borderRadius:14,background:'linear-gradient(135deg,#4f46e5,#7c3aed)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 14px'}},
+                h('i',{className:'ti ti-clipboard-list',style:{fontSize:28,color:'#fff'}})),
+          h('h2',{style:{fontSize:22,fontWeight:800,color:'#111',margin:'0 0 4px'}},theme.cname),
+          h('p',{style:{fontSize:13,color:'#9ca3af',margin:0}},theme.tag)
+        ),
+        h('div',{style:{display:'flex',flexDirection:'column',gap:14}},
+          h('div',{className:'igrp'},
+            h('label',null,'Username'),
+            h('input',{value:lf.u,onChange:e=>setLf(f=>({...f,u:e.target.value})),onKeyDown:e=>e.key==='Enter'&&doLogin(),autoComplete:'off',placeholder:'Enter your username'})
+          ),
+          h('div',{className:'igrp'},
+            h('label',null,'Password'),
+            h('div',{className:'pwr'},
+              h('input',{type:showLPw?'text':'password',value:lf.p,onChange:e=>setLf(f=>({...f,p:e.target.value})),onKeyDown:e=>e.key==='Enter'&&doLogin(),autoComplete:'new-password',placeholder:'Enter your password'}),
+              h('button',{className:'eb',onClick:()=>setShowLPw(s=>!s),tabIndex:-1},h('i',{className:showLPw?'ti ti-eye-off':'ti ti-eye'}))
+            )
+          ),
+          lErr&&h('div',{style:{background:'#fee2e2',color:'#991b1b',borderRadius:8,padding:'9px 12px',fontSize:13,display:'flex',gap:6,alignItems:'center'}},h('i',{className:'ti ti-alert-circle'}),lErr),
+          h('button',{onClick:doLogin,className:'btn-primary',style:{padding:'11px',borderRadius:10,fontSize:15,fontWeight:700,border:'none'}},'Sign In'),
+          h('p',{style:{textAlign:'center',fontSize:12,color:'#9ca3af',margin:0}},'Contact your administrator for credentials')
+        )
+      )
+    )
+  );
+
+  const NB=({v,icon,label})=>h('button',{
+    className:'nav-btn',onClick:()=>setView(v),
+    style:{color:theme.hTxt,background:view===v?'rgba(255,255,255,.18)':'transparent',borderColor:view===v?'rgba(255,255,255,.3)':'transparent'}
+  },h('i',{className:'ti '+icon}),label);
+
+  /* ── MAIN LAYOUT ── */
+  return h('div',{style:{minHeight:'100vh',background:'var(--bg)'}},
+    /* HEADER */
+    h('header',{style:{background:theme.hBg,padding:'0 1.5rem',display:'flex',alignItems:'center',justifyContent:'space-between',height:56,position:'sticky',top:0,zIndex:50,boxShadow:'0 1px 12px rgba(0,0,0,.2)'}},
+      h('div',{style:{display:'flex',alignItems:'center',gap:12}},
+        theme.logo
+          ?h('img',{src:theme.logo,style:{height:(theme.logoSize||36),objectFit:'contain',borderRadius:5,maxWidth:160,transition:'height .2s'}})
+          :h('div',{style:{width:34,height:34,borderRadius:8,background:'rgba(255,255,255,.15)',display:'flex',alignItems:'center',justifyContent:'center'}},h('i',{className:'ti ti-clipboard-list',style:{fontSize:18,color:theme.hTxt}})),
+        h('div',null,
+          h('div',{style:{fontSize:15,fontWeight:800,color:theme.hTxt,lineHeight:1.2,letterSpacing:'-.01em'}},theme.cname),
+          h('div',{style:{fontSize:10,color:theme.hTxt,opacity:.55}},theme.tag)
+        )
+      ),
+      h('nav',{style:{display:'flex',alignItems:'center',gap:3}},
+        h(NB,{v:'dashboard',icon:'ti-layout-dashboard',label:'Dashboard'}),
+        h(NB,{v:'records',icon:'ti-list-details',label:'Records'}),
+        h(NB,{v:'customers',icon:'ti-users',label:'Customers'}),
+        isAdmin&&h(NB,{v:'admin',icon:'ti-shield-lock',label:'Admin'})
+      ),
+      h('div',{style:{display:'flex',alignItems:'center',gap:8}},
+        h('button',{onClick:()=>{setPwTarget(null);setPwfd({old:'',n1:'',n2:''});setPwErr('');setPwSh({});setShowPwFm(true);},style:{background:'rgba(255,255,255,.12)',border:'1px solid rgba(255,255,255,.2)',color:theme.hTxt,padding:'5px 8px',borderRadius:7,cursor:'pointer'},title:'Change password'},h('i',{className:'ti ti-key'})),
+        h('div',{style:{display:'flex',alignItems:'center',gap:7,background:'rgba(255,255,255,.1)',borderRadius:8,padding:'4px 10px'}},
+          h('div',{style:{width:26,height:26,borderRadius:'50%',background:'rgba(255,255,255,.22)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:800,color:theme.hTxt}},ini(user.name)),
+          h('div',null,
+            h('div',{style:{fontSize:12,fontWeight:700,color:theme.hTxt,lineHeight:1.2}},user.name),
+            h('div',{style:{fontSize:10,color:theme.hTxt,opacity:.6}},user.role)
+          )
+        ),
+        h('button',{onClick:()=>setUser(null),style:{background:'rgba(255,255,255,.12)',border:'1px solid rgba(255,255,255,.2)',color:theme.hTxt,padding:'5px 8px',borderRadius:7,cursor:'pointer'},title:'Sign out'},h('i',{className:'ti ti-logout'}))
+      )
+    ),
+
+    h('main',{style:{padding:'1.5rem',maxWidth:1440,margin:'0 auto'}},
+
+      /* ══ DASHBOARD ══ */
+      view==='dashboard'&&h('div',null,
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1.25rem'}},
+          h('h2',{className:'section-hd'},'Dashboard'),
+          isViewer&&h('div',{style:{fontSize:12,color:'#6b7280',background:'#f3f4f6',padding:'5px 10px',borderRadius:7,display:'flex',gap:5,alignItems:'center'}},h('i',{className:'ti ti-eye'}),' View-only access')
+        ),
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,marginBottom:'1.25rem'}},
+          [['Total RFQs',stats.total,theme.acc,'ti-clipboard-list'],['KO Approved',stats.ap,theme.apTx,'ti-check-circle'],['Cancelled',stats.ca,theme.caTx,'ti-circle-x'],['Complete/Dispatched',stats.co,theme.coTx,'ti-truck'],['Pending/Waiting',stats.pe,theme.peTx,'ti-clock']].map(([l,v,tc,ic])=>
+            h('div',{key:l,className:'stat-card'},
+              h('div',{style:{display:'flex',alignItems:'center',gap:6,marginBottom:6}},
+                h('div',{style:{width:28,height:28,borderRadius:7,background:tc+'22',display:'flex',alignItems:'center',justifyContent:'center'}},h('i',{className:'ti '+ic,style:{fontSize:15,color:tc}})),
+                h('span',{style:{fontSize:11,color:'var(--sec)',fontWeight:700}},l)
+              ),
+              h('div',{style:{fontSize:30,fontWeight:800,color:tc}},v)
+            )
+          )
+        ),
+        h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}},
+          h('div',{className:'card'},
+            h('h3',{style:{fontSize:14,fontWeight:700,margin:'0 0 1rem'}},'Status Breakdown'),
+            Object.entries(recs.reduce((a,r)=>{const k=r.status||'Pending';a[k]=(a[k]||0)+1;return a},{})).sort((a,b)=>b[1]-a[1]).map(([s,n])=>{
+              const pct=Math.round(n/recs.length*100);
+              const st={ap:'KO Approved',ca:'Cancelled',co:'Complete',pe:'Pending'};
+              const mp={'KO Approved':{bg:theme.apBg,tc:theme.apTx},'Cancelled':{bg:theme.caBg,tc:theme.caTx},'Complete':{bg:theme.coBg,tc:theme.coTx},'Dispatched':{bg:theme.coBg,tc:theme.coTx},'Pending':{bg:theme.peBg,tc:theme.peTx},'Waiting for Customer Feedback':{bg:theme.peBg,tc:theme.peTx}};
+              const{bg,tc}=mp[s]||{bg:theme.deBg,tc:theme.deTx};
+              return h('div',{key:s,style:{marginBottom:10}},
+                h('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:4}},
+                  h('span',{className:'badge',style:{background:bg,color:tc}},s),
+                  h('span',{style:{fontSize:12,color:'#9ca3af'}},n+' ('+pct+'%)')
+                ),
+                h('div',{style:{height:5,background:'#f3f4f6',borderRadius:3}},h('div',{style:{height:5,background:tc,borderRadius:3,width:pct+'%',transition:'width .4s'}}))
+              );
+            })
+          ),
+          h('div',{className:'card'},
+            h('h3',{style:{fontSize:14,fontWeight:700,margin:'0 0 1rem'}},'Enquiries by Customer'),
+            Object.entries(recs.reduce((a,r)=>{if(r.customer)a[r.customer]=(a[r.customer]||0)+1;return a},{})).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([cu,n])=>
+              h('div',{key:cu,style:{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'7px 0',borderBottom:'1px solid #f3f4f6'}},
+                h('div',{style:{display:'flex',alignItems:'center',gap:8}},
+                  h('div',{style:{width:26,height:26,borderRadius:'50%',background:theme.deBg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:700,color:theme.deTx}},ini(cu)),
+                  h('span',{style:{fontSize:13}},cu)
+                ),
+                h('span',{className:'badge',style:{background:theme.deBg,color:theme.deTx}},n)
+              )
+            )
+          )
+        )
+      ),
+
+      /* ══ RECORDS ══ */
+      view==='records'&&h('div',null,
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1rem'}},
+          h('h2',{className:'section-hd',style:{margin:0}},theme.recordsTitle||'RFQ Records'),
+          h('div',{style:{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}},
+            h('button',{onClick:()=>setShowColMgr(true),style:{display:'flex',alignItems:'center',gap:5,fontSize:13}},h('i',{className:'ti ti-layout-columns'}),'Columns'),
+            h('button',{onClick:()=>setShowExcel(true),style:{display:'flex',alignItems:'center',gap:5,border:'1px solid #a5b4fc',color:'#3730a3',background:'#eef2ff'}},h('i',{className:'ti ti-file-spreadsheet'}),'Import Excel'),
+            /* Export dropdown */
+            h(ExportMenu,{filtered,visibleCols,theme}),
+            /* Print */
+            h('button',{onClick:()=>doPrint(),style:{display:'flex',alignItems:'center',gap:5,border:'1px solid #bbf7d0',color:'#166534',background:'#f0fdf4'}},h('i',{className:'ti ti-printer'}),'Print'),
+            /* Email */
+            h('button',{onClick:()=>doEmail(filtered,visibleCols),style:{display:'flex',alignItems:'center',gap:5,border:'1px solid #fecaca',color:'#991b1b',background:'#fff5f5'}},h('i',{className:'ti ti-mail'}),'Email'),
+            isAdmin&&h('button',{onClick:()=>{setEditRec(null);setShowRecFm(true);},className:'btn-primary',style:{display:'flex',alignItems:'center',gap:5}},h('i',{className:'ti ti-plus'}),'Add Record')
+          )
+        ),
+        isViewer&&h('div',{className:'view-only-bar'},h('i',{className:'ti ti-eye'}),h('strong',null,'View-only mode'),' — contact your administrator to modify records.'),
+        h('div',{style:{display:'flex',gap:8,marginBottom:'1rem',flexWrap:'wrap',alignItems:'center'}},
+          h('input',{placeholder:'Search…',value:srch,onChange:e=>setSrch(e.target.value),style:{flex:1,minWidth:180}}),
+          h('select',{value:fSt,onChange:e=>setFSt(e.target.value),style:{minWidth:150}},
+            h('option',{value:'All'},'All Statuses'),...STATUSES.map(s=>h('option',{key:s},s))),
+          h('select',{value:fCu,onChange:e=>setFCu(e.target.value),style:{minWidth:180}},
+            h('option',{value:'All'},'All Customers'),...custs.map(c=>h('option',{key:c},c))),
+          h('span',{style:{fontSize:12,color:'var(--sec)'}},filtered.length+'/'+recs.length+' records')
+        ),
+        h('div',{className:'print-header',id:'rfq-print-header'},
+          h('div',{style:{display:'flex',alignItems:'center',gap:12}},
+            theme.logo&&h('img',{src:theme.logo,style:{height:Math.min(theme.logoSize||36,50),objectFit:'contain',maxWidth:160}}),
+            h('div',null,
+              h('div',{style:{fontSize:16,fontWeight:800,color:'#1e1b4b'}},theme.cname),
+              h('div',{style:{fontSize:11,color:'#6b7280'}},theme.tag)
+            )
+          ),
+          h('div',{style:{textAlign:'right',fontSize:11,color:'#6b7280'}},
+            h('div',null,theme.recordsTitle||'RFQ Records'),
+            h('div',null,'Printed: '+new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})),
+            h('div',null,'Total Records: '+(filtered.length))
+          )
+        ),
+        h('div',{id:'rfq-print-area',style:{overflowX:'auto',background:'var(--card)',border:'1px solid var(--border)',borderRadius:12}},
+          h('table',null,
+            h('thead',null,
+              h('tr',{style:{background:'var(--thbg)'}},
+                ...visibleCols.map(col=>h('th',{key:col.id,style:{padding:'9px 12px',fontSize:11,fontWeight:700,color:'var(--thtxt)',whiteSpace:'nowrap',textTransform:'uppercase',letterSpacing:'.05em',width:col.width}},col.label)),
+                isAdmin&&h('th',{style:{padding:'9px 12px',width:80}})
+              )
+            ),
+            h('tbody',null,
+              filtered.length===0&&h('tr',null,h('td',{colSpan:visibleCols.length+(isAdmin?1:0),className:'empty'},'No records found.')),
+              filtered.map((r,i)=>h('tr',{key:r.id,style:{background:i%2===0?'var(--card)':'var(--alt)'}},
+                ...visibleCols.map(col=>renderCell(r,col)),
+                isAdmin&&h('td',{style:{padding:'7px 8px',whiteSpace:'nowrap'}},
+                  h('button',{onClick:()=>{setEditRec(r);setShowRecFm(true);},className:'btn-ghost',style:{padding:'4px 7px',marginRight:4,color:'var(--acc)'},title:'Edit'},h('i',{className:'ti ti-edit'})),
+                  h('button',{onClick:()=>delRec(r.id),className:'btn-ghost btn-danger',style:{padding:'4px 7px'},title:'Delete'},h('i',{className:'ti ti-trash'}))
+                )
+              ))
+            )
+          )
+        )
+      ),
+
+      /* ══ CUSTOMERS ══ */
+      view==='customers'&&h('div',null,
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1rem'}},
+          h('h2',{className:'section-hd',style:{margin:0}},'Customers ('+custs.length+')'),
+          isAdmin&&h('button',{onClick:()=>{setCfd('');setEditCIdx(null);setShowCustFm(true);},className:'btn-primary',style:{display:'flex',alignItems:'center',gap:5}},h('i',{className:'ti ti-plus'}),'Add Customer')
+        ),
+        isViewer&&h('div',{className:'view-only-bar'},h('i',{className:'ti ti-eye'}),h('strong',null,'View-only mode'),' — browse customer details below.'),
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:12}},
+          custs.map((cu,idx)=>{
+            const cr=recs.filter(r=>r.customer===cu);
+            const cnt=cr.length;
+            const sc=STATUSES.reduce((a,s)=>{a[s]=cr.filter(r=>r.status===s).length;return a},{});
+            const latest=[...cr].sort((a,b)=>new Date(b.enquiryDate)-new Date(a.enquiryDate))[0];
+            return h('div',{key:cu,className:'cust-card'},
+              h('div',{style:{display:'flex',alignItems:'center',gap:10,marginBottom:cnt>0?10:0}},
+                h('div',{style:{width:40,height:40,borderRadius:'50%',background:theme.deBg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:800,color:theme.deTx,flexShrink:0}},ini(cu)),
+                h('div',{style:{flex:1,minWidth:0}},
+                  h('p',{style:{margin:0,fontWeight:700,fontSize:13,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},cu),
+                  h('p',{style:{margin:'2px 0 0',fontSize:12,color:'var(--sec)'}},cnt+' RFQ'+(cnt!==1?'s':''))
+                ),
+                isAdmin&&h('div',{style:{display:'flex',gap:4}},
+                  h('button',{onClick:()=>{setCfd(cu);setEditCIdx(idx);setShowCustFm(true);},className:'btn-ghost',style:{padding:'3px 7px',color:'var(--acc)'},title:'Edit'},h('i',{className:'ti ti-edit'})),
+                  h('button',{onClick:()=>delCust(idx),className:'btn-ghost btn-danger',style:{padding:'3px 7px'},title:'Delete'},h('i',{className:'ti ti-trash'}))
+                )
+              ),
+              cnt>0&&h('div',null,
+                h('div',{style:{display:'flex',flexWrap:'wrap',gap:4,marginBottom:8}},
+                  STATUSES.filter(s=>sc[s]>0).map(s=>{
+                    const mp={'KO Approved':{bg:theme.apBg,tc:theme.apTx},'Cancelled':{bg:theme.caBg,tc:theme.caTx},'Complete':{bg:theme.coBg,tc:theme.coTx},'Dispatched':{bg:theme.coBg,tc:theme.coTx},'Pending':{bg:theme.peBg,tc:theme.peTx},'Waiting for Customer Feedback':{bg:theme.peBg,tc:theme.peTx}};
+                    const{bg,tc}=mp[s]||{bg:theme.deBg,tc:theme.deTx};
+                    return h('span',{key:s,className:'badge',style:{background:bg,color:tc}},s+' ×'+sc[s]);
+                  })
+                ),
+                h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}},
+                  [['Enquiry Date',fmt(latest?.enquiryDate)],['KO Date',fmt(latest?.koDate)],['Delivery / ETA',fmt(latest?.customerETA)],['Total Qty',cr.reduce((a,r)=>a+(Number(r.enquiryQty)||0),0)||'—']].map(([l,v])=>
+                    h('div',{key:l,style:{background:'var(--alt)',borderRadius:7,padding:'6px 9px'}},
+                      h('div',{style:{fontSize:10,color:'var(--sec)',fontWeight:700,textTransform:'uppercase'}},l),
+                      h('div',{style:{fontSize:13,fontWeight:700,marginTop:2}},v)
+                    )
+                  )
+                )
+              )
+            );
+          })
+        )
+      ),
+
+      /* ══ ADMIN ══ */
+      view==='admin'&&isAdmin&&h('div',null,
+        h('h2',{className:'section-hd'},'Admin Panel'),
+        h('div',{style:{display:'flex',gap:8,marginBottom:'1.25rem'}},
+          ['users','numbering','appearance','columns'].map(t=>h('button',{key:t,className:'tab'+(adminTab===t?' active':''),onClick:()=>setAdminTab(t)},
+            {users:'👤 Users',numbering:'🔢 Numbering',appearance:'🎨 Appearance',columns:'⚙️ Columns'}[t]))
+        ),
+
+        /* Users Tab */
+        adminTab==='users'&&h('div',{className:'card',style:{maxWidth:600}},
+          h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1rem'}},
+            h('h3',{style:{fontSize:14,fontWeight:700,margin:0}},'User Accounts'),
+            h('button',{onClick:()=>{setUfd({role:'Viewer'});setEditUsr(null);setShowUsrFm(true);},className:'btn-primary',style:{fontSize:12,display:'flex',alignItems:'center',gap:5}},h('i',{className:'ti ti-user-plus'}),'Add User')
+          ),
+          users.map(u=>h('div',{key:u.id,style:{display:'flex',alignItems:'center',gap:10,padding:'10px 0',borderBottom:'1px solid #f3f4f6'}},
+            h('div',{style:{width:36,height:36,borderRadius:'50%',background:u.active?theme.deBg:'#f3f4f6',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:800,color:u.active?theme.deTx:'#9ca3af',flexShrink:0}},ini(u.name)),
+            h('div',{style:{flex:1,minWidth:0}},
+              h('div',{style:{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}},
+                h('span',{style:{fontSize:13,fontWeight:700,color:u.active?'#111':'#9ca3af'}},u.name),h(RBadge,{r:u.role}),
+                !u.active&&h('span',{className:'badge',style:{background:'#f3f4f6',color:'#9ca3af'}},'Inactive')
+              ),
+              h('div',{style:{fontSize:11,color:'#9ca3af',marginTop:1}},'@'+u.username)
+            ),
+            h('div',{style:{display:'flex',gap:4}},
+              h('button',{onClick:()=>{setEditUsr(u);setUfd({name:u.name,username:u.username,role:u.role});setShowUsrFm(true);},className:'btn-ghost',style:{padding:'3px 7px'},title:'Edit'},h('i',{className:'ti ti-edit'})),
+              h('button',{onClick:()=>{setPwTarget(u);setPwfd({old:'',n1:'',n2:''});setPwErr('');setPwSh({});setShowPwFm(true);},className:'btn-ghost',style:{padding:'3px 7px'},title:'Reset password'},h('i',{className:'ti ti-key'})),
+              u.id!==user.id&&h('button',{onClick:()=>setUsers(us=>us.map(x=>x.id===u.id?{...x,active:!x.active}:x)),className:'btn-ghost',style:{padding:'3px 7px',color:u.active?'#dc2626':'#16a34a'},title:u.active?'Deactivate':'Activate'},h('i',{className:u.active?'ti ti-user-off':'ti ti-user-check'}))
+            )
+          ))
+        ),
+
+        /* Appearance Tab */
+        adminTab==='numbering'&&h('div',null,
+          h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}},
+            /* ── Enquiry Number ── */
+            h('div',{className:'card'},
+              h('h3',{style:{fontSize:14,fontWeight:700,margin:'0 0 4px'}},'Enquiry Number Format'),
+              h('p',{style:{fontSize:12,color:'var(--sec)',marginBottom:16}},'Current preview: ',h('code',{style:{fontWeight:700,background:'#eef2ff',color:'#3730a3',padding:'2px 8px',borderRadius:5}},nextEnqNo())),
+              h('div',{style:{display:'flex',flexDirection:'column',gap:12}},
+                h('div',{className:'igrp'},
+                  h('label',null,'Prefix'),
+                  h('input',{value:theme.enqPrefix||'ENQ',onChange:e=>setTheme(t=>({...t,enqPrefix:e.target.value})),placeholder:'e.g. ENQ'})
+                ),
+                h('div',{className:'igrp'},
+                  h('label',null,'Sequence Padding (digits)'),
+                  h('select',{value:theme.enqPad||3,onChange:e=>setTheme(t=>({...t,enqPad:parseInt(e.target.value)}))},
+                    [2,3,4,5,6].map(n=>h('option',{key:n,value:n},n+' digits  (e.g. '+String(1).padStart(n,'0')+')'))
+                  )
+                ),
+                h('div',{className:'igrp'},
+                  h('label',null,'Include Fiscal Year Suffix'),
+                  h('select',{value:theme.enqUseFY!==false?'yes':'no',onChange:e=>setTheme(t=>({...t,enqUseFY:e.target.value==='yes'}))},
+                    h('option',{value:'yes'},'Yes — e.g. ENQ/001/26-27'),
+                    h('option',{value:'no'},'No — e.g. ENQ/001')
+                  )
+                ),
+                h('div',{style:{background:'#f9fafb',borderRadius:8,padding:'10px 12px',fontSize:12,color:'var(--sec)'}},
+                  'Format: ',h('code',null,(theme.enqPrefix||'ENQ')+'/{SEQ}'+((theme.enqUseFY!==false)?'/{FY}':''))
+                )
+              )
+            ),
+            /* ── Quotation Number ── */
+            h('div',{className:'card'},
+              h('h3',{style:{fontSize:14,fontWeight:700,margin:'0 0 4px'}},'Quotation Number Format'),
+              h('p',{style:{fontSize:12,color:'var(--sec)',marginBottom:16}},'Current preview: ',h('code',{style:{fontWeight:700,background:'#eef2ff',color:'#3730a3',padding:'2px 8px',borderRadius:5}},nextQuotNo())),
+              h('div',{style:{display:'flex',flexDirection:'column',gap:12}},
+                h('div',{className:'igrp'},
+                  h('label',null,'Prefix'),
+                  h('input',{value:theme.quotPrefix||'RI-IND',onChange:e=>setTheme(t=>({...t,quotPrefix:e.target.value})),placeholder:'e.g. RI-IND'})
+                ),
+                h('div',{className:'igrp'},
+                  h('label',null,'Sequence Padding (digits)'),
+                  h('select',{value:theme.quotPad||3,onChange:e=>setTheme(t=>({...t,quotPad:parseInt(e.target.value)}))},
+                    [2,3,4,5,6].map(n=>h('option',{key:n,value:n},n+' digits  (e.g. '+String(1).padStart(n,'0')+')'))
+                  )
+                ),
+                h('div',{className:'igrp'},
+                  h('label',null,'Include Fiscal Year Suffix'),
+                  h('select',{value:theme.quotUseFY!==false?'yes':'no',onChange:e=>setTheme(t=>({...t,quotUseFY:e.target.value==='yes'}))},
+                    h('option',{value:'yes'},'Yes — e.g. RI-IND-001/26-27'),
+                    h('option',{value:'no'},'No — e.g. RI-IND-001')
+                  )
+                ),
+                h('div',{style:{background:'#f9fafb',borderRadius:8,padding:'10px 12px',fontSize:12,color:'var(--sec)'}},
+                  'Format: ',h('code',null,(theme.quotPrefix||'RI-IND')+'-{SEQ}'+((theme.quotUseFY!==false)?'/{FY}':''))
+                )
+              )
+            )
+          ),
+          /* ── Fiscal Year Info ── */
+          h('div',{className:'card',style:{marginTop:14}},
+            h('div',{style:{display:'flex',alignItems:'center',gap:10}},
+              h('div',{style:{width:36,height:36,borderRadius:8,background:'#eef2ff',display:'flex',alignItems:'center',justifyContent:'center'}},h('i',{className:'ti ti-calendar',style:{color:'#6366f1',fontSize:18}})),
+              h('div',null,
+                h('div',{style:{fontSize:13,fontWeight:700}},h('span',{style:{color:'var(--sec)'}},'Current Fiscal Year: '),h('code',{style:{color:'#3730a3',background:'#eef2ff',padding:'2px 8px',borderRadius:5}},getFiscalYear())),
+                h('div',{style:{fontSize:12,color:'var(--sec)',marginTop:3}},'Fiscal year runs April – March. Numbers reset automatically each new fiscal year.')
+              )
+            )
+          )
+        ),
+
+        adminTab==='appearance'&&h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}},
+          h('div',{className:'card'},
+            h('h3',{style:{fontSize:14,fontWeight:700,margin:'0 0 1rem'}},'Logo & Branding'),
+            h('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:16}},
+              theme.logo?h('img',{src:theme.logo,style:{height:Math.max(40,theme.logoSize||36),maxHeight:80,borderRadius:7,border:'1px solid var(--border)',objectFit:'contain'}})
+                :h('div',{style:{width:50,height:50,borderRadius:8,background:'#f3f4f6',display:'flex',alignItems:'center',justifyContent:'center',color:'#9ca3af'}},h('i',{className:'ti ti-photo',style:{fontSize:22}})),
+              h('div',{style:{display:'flex',flexDirection:'column',gap:6}},
+                h('button',{onClick:()=>logoRef.current.click(),style:{fontSize:12,display:'flex',alignItems:'center',gap:5}},h('i',{className:'ti ti-upload'}),'Upload Logo'),
+                theme.logo&&h('button',{onClick:()=>setTheme(t=>({...t,logo:''})),className:'btn-danger',style:{fontSize:12}},h('i',{className:'ti ti-trash'}),' Remove'),
+                h('input',{type:'file',ref:logoRef,accept:'image/*',style:{display:'none'},onChange:handleLogo})
+              ),
+              theme.logo&&h('div',{style:{marginTop:14,display:'flex',flexDirection:'column',gap:10}},
+                h('div',{className:'igrp'},
+                  h('label',null,'Header Logo Size — '+(theme.logoSize||36)+'px'),
+                  h('div',{style:{display:'flex',alignItems:'center',gap:10}},
+                    h('span',{style:{fontSize:11,color:'var(--sec)'}},'24px'),
+                    h('input',{type:'range',min:24,max:52,step:2,value:theme.logoSize||36,
+                      onChange:e=>setTheme(t=>({...t,logoSize:parseInt(e.target.value)})),
+                      style:{flex:1,accentColor:'var(--acc)',cursor:'pointer'}}),
+                    h('span',{style:{fontSize:11,color:'var(--sec)'}},'52px')
+                  ),
+                  h('div',{style:{display:'flex',gap:6,marginTop:6}},
+                    [24,30,36,42,48,52].map(sz=>
+                      h('button',{key:sz,onClick:()=>setTheme(t=>({...t,logoSize:sz})),
+                        style:{fontSize:11,padding:'3px 8px',background:(theme.logoSize||36)===sz?'var(--acc)':'var(--card)',color:(theme.logoSize||36)===sz?'#fff':'var(--txt)',borderColor:(theme.logoSize||36)===sz?'var(--acc)':'var(--border)',borderRadius:5}},sz+'px')
+                    )
+                  )
+                ),
+                h('div',{className:'igrp'},
+                  h('label',null,'Login Page Logo Size — '+(theme.loginLogoSize||60)+'px'),
+                  h('div',{style:{display:'flex',alignItems:'center',gap:10}},
+                    h('span',{style:{fontSize:11,color:'var(--sec)'}},'40px'),
+                    h('input',{type:'range',min:40,max:120,step:4,value:theme.loginLogoSize||60,
+                      onChange:e=>setTheme(t=>({...t,loginLogoSize:parseInt(e.target.value)})),
+                      style:{flex:1,accentColor:'var(--acc)',cursor:'pointer'}}),
+                    h('span',{style:{fontSize:11,color:'var(--sec)'}},'120px')
+                  ),
+                  h('div',{style:{display:'flex',gap:6,marginTop:6}},
+                    [40,60,80,100,120].map(sz=>
+                      h('button',{key:sz,onClick:()=>setTheme(t=>({...t,loginLogoSize:sz})),
+                        style:{fontSize:11,padding:'3px 8px',background:(theme.loginLogoSize||60)===sz?'var(--acc)':'var(--card)',color:(theme.loginLogoSize||60)===sz?'#fff':'var(--txt)',borderColor:(theme.loginLogoSize||60)===sz?'var(--acc)':'var(--border)',borderRadius:5}},sz+'px')
+                    )
+                  )
+                ),
+                h('div',{style:{background:'var(--alt)',borderRadius:8,padding:'10px 12px',display:'flex',alignItems:'center',gap:12}},
+                  h('span',{style:{fontSize:12,color:'var(--sec)'}},'Live preview:'),
+                  h('img',{src:theme.logo,style:{height:(theme.logoSize||36),objectFit:'contain',maxWidth:160,borderRadius:4,border:'1px solid var(--border)',background:'var(--card)',padding:2}})
+                )
+              ),
+              !theme.logo&&h('div',null
+              )
+            ),
+            h('div',{style:{display:'flex',flexDirection:'column',gap:10}},
+              h('div',{className:'igrp'},h('label',null,'Company Name'),h('input',{value:theme.cname,onChange:e=>setTheme(t=>({...t,cname:e.target.value}))})),
+              h('div',{className:'igrp'},h('label',null,'Records Tab Heading'),h('input',{value:theme.recordsTitle||'RFQ Records',onChange:e=>setTheme(t=>({...t,recordsTitle:e.target.value})),placeholder:'e.g. RFQ Records'})),
+              h('div',{className:'igrp'},h('label',null,'Tagline / Document No'),h('input',{value:theme.tag,onChange:e=>setTheme(t=>({...t,tag:e.target.value}))}))
+            )
+          ),
+          h('div',{className:'card',style:{overflowY:'auto',maxHeight:480}},
+            h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1rem'}},
+              h('h3',{style:{fontSize:14,fontWeight:700,margin:0}},'Color Theme'),
+              h('button',{onClick:()=>setTheme(DEF_THEME),style:{fontSize:12,display:'flex',alignItems:'center',gap:4}},h('i',{className:'ti ti-refresh'}),'Reset')
+            ),
+            [['Header Background','hBg'],['Header Text','hTxt'],['Accent / Buttons','acc'],['Accent Text','accTxt'],
+             ['KO Approved Text','apTx'],['KO Approved BG','apBg'],['Cancelled Text','caTx'],['Cancelled BG','caBg'],
+             ['Complete Text','coTx'],['Complete BG','coBg'],['Pending Text','peTx'],['Pending BG','peBg'],
+             ['Default Badge Text','deTx'],['Default Badge BG','deBg']
+            ].map(([l,k])=>h(CRow,{key:k,label:l,k,t:theme,setT:setTheme}))
+          )
+        ),
+
+        /* Columns Tab */
+        adminTab==='columns'&&h('div',{className:'card',style:{maxWidth:600}},
+          h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1rem'}},
+            h('h3',{style:{fontSize:14,fontWeight:700,margin:0}},'Column Manager'),
+            h('div',{style:{display:'flex',gap:8}},
+              h('button',{onClick:()=>setCols(DEF_COLS),style:{fontSize:12,display:'flex',alignItems:'center',gap:4}},h('i',{className:'ti ti-refresh'}),'Reset'),
+              h('button',{onClick:()=>setShowColMgr(true),className:'btn-primary',style:{fontSize:12,display:'flex',alignItems:'center',gap:4}},h('i',{className:'ti ti-layout-columns'}),'Open Column Editor')
+            )
+          ),
+          h('p',{style:{fontSize:13,color:'var(--sec)',marginBottom:16}},'Currently showing '+visibleCols.length+' of '+cols.length+' columns. Use the Column Editor to reorder, rename, show/hide, or add custom columns.'),
+          h('div',null,
+            cols.map((c,i)=>h('div',{key:c.id,style:{display:'flex',alignItems:'center',gap:8,padding:'6px 0',borderBottom:'1px solid #f3f4f6',fontSize:13}},
+              h('span',{style:{width:24,textAlign:'center',color:'#9ca3af',fontSize:11}},i+1),
+              h('i',{className:c.visible?'ti ti-eye':'ti ti-eye-off',style:{color:c.visible?'var(--acc)':'#d1d5db',fontSize:14}}),
+              h('span',{style:{flex:1,color:c.visible?'#111':'#9ca3af',fontWeight:c.visible?600:400}},c.label),
+              c.custom&&h('span',{className:'badge',style:{background:'#f3f4f6',color:'#6b7280',fontSize:10}},'custom'),
+              c.locked&&h('i',{className:'ti ti-lock',style:{color:'#9ca3af',fontSize:12}})
+            ))
+          )
+        )
+      )
+    ),
+
+    /* ══ MODALS ══ */
+    showColMgr&&h(ColManager,{cols,setCols,onClose:()=>setShowColMgr(false),isAdmin}),
+
+    showRecFm&&h(RecordForm,{rec:editRec,custs,onSave:saveRec,onClose:()=>setShowRecFm(false),nextEnqNo:nextEnqNo(),nextQuotNo:nextQuotNo()}),
+
+    showCustFm&&h('div',{className:'modal-bg',onClick:e=>e.target===e.currentTarget&&setShowCustFm(false)},
+      h('div',{className:'modal modal-sm'},
+        h('h3',{style:{margin:'0 0 1rem',fontSize:16,fontWeight:700}},editCIdx!==null?'Edit Customer':'Add Customer'),
+        editCIdx!==null&&h('div',{style:{background:'#fef3c7',border:'1px solid #fcd34d',borderRadius:8,padding:'9px 12px',fontSize:13,color:'#92400e',marginBottom:12,display:'flex',gap:6}},
+          h('i',{className:'ti ti-refresh'}),' All linked records update automatically.'),
+        h('div',{className:'igrp',style:{marginBottom:14}},
+          h('label',null,'Customer Name'),
+          h('input',{value:cfd,onChange:e=>setCfd(e.target.value),placeholder:'Full customer name',onKeyDown:e=>e.key==='Enter'&&saveCust()})
+        ),
+        h('div',{style:{display:'flex',gap:8,justifyContent:'flex-end'}},
+          h('button',{onClick:()=>setShowCustFm(false)},'Cancel'),
+          h('button',{onClick:saveCust,className:'btn-primary'},editCIdx!==null?'Update & Sync All':'Add Customer')
+        )
+      )
+    ),
+
+    showUsrFm&&h('div',{className:'modal-bg',onClick:e=>e.target===e.currentTarget&&setShowUsrFm(false)},
+      h('div',{className:'modal modal-sm'},
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1.25rem'}},
+          h('h3',{style:{margin:0,fontSize:16,fontWeight:700}},editUsr?'Edit User':'Add New User'),
+          h('button',{onClick:()=>setShowUsrFm(false),className:'btn-ghost',style:{padding:'4px 8px'}},'✕')
+        ),
+        h('div',{style:{display:'flex',flexDirection:'column',gap:10}},
+          h('div',{className:'igrp'},h('label',null,'Full Name *'),h('input',{value:ufd.name||'',onChange:e=>setUfd(f=>({...f,name:e.target.value})),placeholder:'Full name'})),
+          h('div',{className:'igrp'},h('label',null,'Username *'),h('input',{value:ufd.username||'',onChange:e=>setUfd(f=>({...f,username:e.target.value})),placeholder:'Login username',autoComplete:'off'})),
+          !editUsr&&h('div',{className:'igrp'},h('label',null,'Password *'),h('input',{type:'password',value:ufd.password||'',onChange:e=>setUfd(f=>({...f,password:e.target.value})),placeholder:'Initial password',autoComplete:'new-password'})),
+          h('div',{className:'igrp'},
+            h('label',null,'Role *'),
+            h('select',{value:ufd.role||'Viewer',onChange:e=>setUfd(f=>({...f,role:e.target.value}))},ROLES.map(r=>h('option',{key:r,value:r},r)))
+          ),
+          h('div',{style:{background:'var(--alt)',borderRadius:8,padding:'10px 12px',fontSize:12,color:'var(--sec)',lineHeight:1.6}},
+            h('strong',null,'Admin'),' — full control.  ',h('strong',null,'Manager/Sales'),' — view only.  ',h('strong',null,'Viewer'),' — read-only.')
+        ),
+        h('div',{style:{display:'flex',gap:8,marginTop:'1.25rem',justifyContent:'flex-end'}},
+          h('button',{onClick:()=>setShowUsrFm(false)},'Cancel'),
+          h('button',{onClick:saveUsr,className:'btn-primary'},editUsr?'Save Changes':'Create User')
+        )
+      )
+    ),
+
+    showPwFm&&h('div',{className:'modal-bg',onClick:e=>e.target===e.currentTarget&&setShowPwFm(false)},
+      h('div',{className:'modal modal-sm'},
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1.25rem'}},
+          h('h3',{style:{margin:0,fontSize:16,fontWeight:700}},isAdmin&&pwTarget&&pwTarget.id!==user.id?'Reset — '+pwTarget.name:'Change My Password'),
+          h('button',{onClick:()=>setShowPwFm(false),className:'btn-ghost',style:{padding:'4px 8px'}},'✕')
+        ),
+        isAdmin&&pwTarget&&pwTarget.id!==user.id&&h('div',{style:{background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:8,padding:'9px 12px',fontSize:13,color:'#166534',marginBottom:12}},h('i',{className:'ti ti-shield-check'}),' Admin override for @'+pwTarget.username),
+        h('div',{style:{display:'flex',flexDirection:'column',gap:10}},
+          (!isAdmin||!pwTarget||pwTarget.id===user.id)&&h(PwIn,{label:'Current Password',fk:'old',fd:pwfd,set:setPwfd,show:!!pwSh.old,onToggle:()=>setPwSh(s=>({...s,old:!s.old}))}),
+          h(PwIn,{label:'New Password',fk:'n1',fd:pwfd,set:setPwfd,show:!!pwSh.n1,onToggle:()=>setPwSh(s=>({...s,n1:!s.n1}))}),
+          h(PwIn,{label:'Confirm New Password',fk:'n2',fd:pwfd,set:setPwfd,show:!!pwSh.n2,onToggle:()=>setPwSh(s=>({...s,n2:!s.n2}))}),
+          pwErr&&h('p',{style:{margin:0,fontSize:13,color:'#dc2626',display:'flex',gap:5,alignItems:'center'}},h('i',{className:'ti ti-alert-circle'}),pwErr)
+        ),
+        h('div',{style:{display:'flex',gap:8,marginTop:'1.25rem',justifyContent:'flex-end'}},
+          h('button',{onClick:()=>setShowPwFm(false)},'Cancel'),
+          h('button',{onClick:savePw,className:'btn-primary'},'Update Password')
+        )
+      )
+    ),
+
+    showExcel&&h(ExcelUpload,{onImport:handleExcelImport,onClose:()=>setShowExcel(false),custs,setCusts}),
+    toast&&h('div',{className:'toast',style:{background:toast.warn?'#92400e':'#111'}},
+      h('i',{className:toast.warn?'ti ti-alert-triangle':'ti ti-check'}),toast.msg)
+  );
+}
+
+ReactDOM.render(h(App),document.getElementById('app'));
+</script>
+</body>
+</html>
